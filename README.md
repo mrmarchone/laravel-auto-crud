@@ -4,7 +4,7 @@
 
 A Laravel package that automates the generation of CRUD (Create, Read, Update, Delete) operations for your models, making development faster and more efficient.
 
-[Watch the Video on YouTube](https://www.youtube.com/watch?v=wOOBAEmQn0o)
+[Watch the Video on YouTube](https://www.youtube.com/watch?v=6IqRc3OgUIM)
 
 ## Installation
 
