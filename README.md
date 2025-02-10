@@ -1,6 +1,10 @@
 # Laravel Auto CRUD Generator
 
+![Laravel Auto CRUD](images/laravel-auto-crud.png)
+
 A Laravel package that automates the generation of CRUD (Create, Read, Update, Delete) operations for your models, making development faster and more efficient.
+
+[Watch the Video on YouTube](https://www.youtube.com/watch?v=wOOBAEmQn0o)
 
 ## Installation
 
