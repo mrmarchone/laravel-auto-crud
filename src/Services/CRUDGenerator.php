@@ -244,7 +244,12 @@ class CRUDGenerator
             label: 'Do you want to create an api or web controller?',
             default: 'api',
             required: true,
-            validate: ['type' => 'in:web,api'],
+            validate: function ($value) {
+                if (!in_array(strtolower($value), ['api', 'web'])) {
+                    return 'Please enter a valid type api or web';
+                }
+                return null;
+            },
             hint: 'Write api or web',
         );
     }
