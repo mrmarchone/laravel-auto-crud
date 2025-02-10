@@ -1,0 +1,49 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ requestNamespace }};
+use {{ modelNamespace }};
+
+class {{ class }} extends Controller
+{
+    public function index()
+    {
+        ${{ modelPlural }} = {{ model }}::latest()->paginate(10);
+        return view('{{ viewPath }}.index', compact('{{ modelPlural }}'));
+    }
+
+    public function create()
+    {
+        return view('{{ viewPath }}.create');
+    }
+
+    public function store({{ request }} $request)
+    {
+        {{ model }}::create($request->validated());
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Created successfully');
+    }
+
+    public function show({{ model }} ${{ modelVariable }})
+    {
+        return view('{{ viewPath }}.show', compact('{{ modelVariable }}'));
+    }
+
+    public function edit({{ model }} ${{ modelVariable }})
+    {
+        return view('{{ viewPath }}.edit', compact('{{ modelVariable }}'));
+    }
+
+    public function update({{ request }} $request, {{ model }} ${{ modelVariable }})
+    {
+        ${{ modelVariable }}->update($request->validated());
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Updated successfully');
+    }
+
+    public function destroy({{ model }} ${{ modelVariable }})
+    {
+        ${{ modelVariable }}->delete();
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Deleted successfully');
+    }
+}

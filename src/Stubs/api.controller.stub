@@ -1,0 +1,56 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ requestNamespace }};
+use {{ resourceNamespace }};
+use {{ modelNamespace }};
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class {{ class }} extends Controller
+{
+    public function index()
+    {
+        return {{ resource }}::collection({{ model }}::latest()->paginate(10));
+    }
+
+    public function store({{ request }} $request)
+    {
+        try {
+            ${{ modelVariable }} = {{ model }}::create($request->validated());
+            return new {{ resource }}(${{ modelVariable }});
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function show({{ model }} ${{ modelVariable }})
+    {
+        return {{ resource }}::make(${{ modelVariable }});
+    }
+
+    public function update({{ request }} $request, {{ model }} ${{ modelVariable }})
+    {
+        try {
+            ${{ modelVariable }}->update($request->validated());
+            return new {{ resource }}(${{ modelVariable }});
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy({{ model }} ${{ modelVariable }})
+    {
+        try {
+            ${{ modelVariable }}->delete();
+            return response()->json(['message' => 'Deleted successfully'], Response::HTTP_NO_CONTENT);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}
