@@ -198,7 +198,7 @@ class UserResource extends JsonResource
     }
 }
 ```
-- API Routes
+- API Routes:
 ```php
 <?php
 
@@ -206,7 +206,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('/users', App\Http\Controllers\API\UserController::class);
 ```
-- Web Routes
+- Web Routes:
 ```php
 <?php
 
@@ -216,7 +216,7 @@ use Illuminate\Support\Facades\Route;
 Route::resource('/users', App\Http\Controllers\UserController::class);
 ```
 - Views (if applicable)
-  ![Laravel Auto CRUD](images/resources_views.png)
+  - ![Laravel Auto CRUD](images/resources_views.png)
 - CURL (if applicable): 
   - You will find it in the laravel-auto-crud folder under the name curl.txt.
 ```bash
