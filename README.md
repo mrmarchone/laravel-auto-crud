@@ -63,7 +63,7 @@ class UserController extends Controller
             return new UserResource($user);
         } catch (\Exception $exception) {
             report($exception);
-            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -79,7 +79,7 @@ class UserController extends Controller
             return new UserResource($user);
         } catch (\Exception $exception) {
             report($exception);
-            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -90,7 +90,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Deleted successfully'], Response::HTTP_NO_CONTENT);
         } catch (\Exception $exception) {
             report($exception);
-            return response()->json(['error' => 'Deleted successfully'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
