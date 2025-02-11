@@ -11,12 +11,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class {{ class }} extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         return {{ resource }}::collection({{ model }}::latest()->paginate(10));
     }
 
-    public function store({{ request }} $request)
+    public function store({{ request }} $request): {{ resource }}|\Illuminate\Http\JsonResponse
     {
         try {
             ${{ modelVariable }} = {{ model }}::create($request->validated());
@@ -27,12 +27,12 @@ class {{ class }} extends Controller
         }
     }
 
-    public function show({{ model }} ${{ modelVariable }})
+    public function show({{ model }} ${{ modelVariable }}): {{ resource }}
     {
         return {{ resource }}::make(${{ modelVariable }});
     }
 
-    public function update({{ request }} $request, {{ model }} ${{ modelVariable }})
+    public function update({{ request }} $request, {{ model }} ${{ modelVariable }}): {{ resource }}|\Illuminate\Http\JsonResponse
     {
         try {
             ${{ modelVariable }}->update($request->validated());
@@ -43,7 +43,7 @@ class {{ class }} extends Controller
         }
     }
 
-    public function destroy({{ model }} ${{ modelVariable }})
+    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\JsonResponse
     {
         try {
             ${{ modelVariable }}->delete();

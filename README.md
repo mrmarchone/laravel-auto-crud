@@ -40,6 +40,7 @@ This will generate:
 - API Controller:
 ```php
 <?php
+
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -51,12 +52,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         return UserResource::collection(User::latest()->paginate(10));
     }
-    
-    public function store(UserRequest $request)
+
+    public function store(UserRequest $request): UserResource|\Illuminate\Http\JsonResponse
     {
         try {
             $user = User::create($request->validated());
@@ -66,13 +67,13 @@ class UserController extends Controller
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    
-    public function show(User $user)
+
+    public function show(User $user): UserResource
     {
         return UserResource::make($user);
     }
-    
-    public function update(UserRequest $request, User $user)
+
+    public function update(UserRequest $request, User $user): UserResource|\Illuminate\Http\JsonResponse
     {
         try {
             $user->update($request->validated());
@@ -82,8 +83,8 @@ class UserController extends Controller
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    
-    public function destroy(User $user)
+
+    public function destroy(User $user): \Illuminate\Http\JsonResponse
     {
         try {
             $user->delete();
@@ -107,40 +108,40 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\View
     {
         $users = User::latest()->paginate(10);
         return view('users.index', compact('users'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\View
     {
         return view('users.create');
     }
 
-    public function store(UserRequest $request)
+    public function store(UserRequest $request): \Illuminate\Http\RedirectResponse
     {
         User::create($request->validated());
         return redirect()->route('users.index')->with('success', 'Created successfully');
     }
 
-    public function show(User $user)
+    public function show(User $user): \Illuminate\Contracts\View\View
     {
         return view('users.show', compact('user'));
     }
 
-    public function edit(User $user)
+    public function edit(User $user): \Illuminate\Contracts\View\View
     {
         return view('users.edit', compact('user'));
     }
 
-    public function update(UserRequest $request, User $user)
+    public function update(UserRequest $request, User $user): \Illuminate\Http\RedirectResponse
     {
         $user->update($request->validated());
         return redirect()->route('users.index')->with('success', 'Updated successfully');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user): \Illuminate\Http\RedirectResponse
     {
         $user->delete();
         return redirect()->route('users.index')->with('success', 'Deleted successfully');

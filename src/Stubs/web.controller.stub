@@ -8,40 +8,40 @@ use {{ modelNamespace }};
 
 class {{ class }} extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\View
     {
         ${{ modelPlural }} = {{ model }}::latest()->paginate(10);
         return view('{{ viewPath }}.index', compact('{{ modelPlural }}'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\View
     {
         return view('{{ viewPath }}.create');
     }
 
-    public function store({{ request }} $request)
+    public function store({{ request }} $request): \Illuminate\Http\RedirectResponse
     {
         {{ model }}::create($request->validated());
         return redirect()->route('{{ routeName }}.index')->with('success', 'Created successfully');
     }
 
-    public function show({{ model }} ${{ modelVariable }})
+    public function show({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
     {
         return view('{{ viewPath }}.show', compact('{{ modelVariable }}'));
     }
 
-    public function edit({{ model }} ${{ modelVariable }})
+    public function edit({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
     {
         return view('{{ viewPath }}.edit', compact('{{ modelVariable }}'));
     }
 
-    public function update({{ request }} $request, {{ model }} ${{ modelVariable }})
+    public function update({{ request }} $request, {{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
     {
         ${{ modelVariable }}->update($request->validated());
         return redirect()->route('{{ routeName }}.index')->with('success', 'Updated successfully');
     }
 
-    public function destroy({{ model }} ${{ modelVariable }})
+    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
     {
         ${{ modelVariable }}->delete();
         return redirect()->route('{{ routeName }}.index')->with('success', 'Deleted successfully');
