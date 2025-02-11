@@ -34,8 +34,10 @@ php artisan auto-crud:generate
 php artisan auto-crud:generate
 ```
 
+![Views](images/command.png)
+
 This will generate:
-- API Controller
+- API Controller:
 ```php
 <?php
 namespace App\Http\Controllers\API;
@@ -93,7 +95,7 @@ class UserController extends Controller
     }
 }
 ```
-- Web Controller
+- Web Controller:
 ```php
 <?php
 
@@ -145,7 +147,7 @@ class UserController extends Controller
     }
 }
 ```
-- Request
+- Request:
 ```php
 <?php
 
@@ -172,7 +174,7 @@ class UserRequest extends FormRequest
     }
 }
 ```
-- Resource
+- Resource:
 ```php
 <?php
 
@@ -215,8 +217,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::resource('/users', App\Http\Controllers\UserController::class);
 ```
-- Views (if applicable)
-  - ![Laravel Auto CRUD](images/resources_views.png)
+- Views (if applicable):
+  - ![Views](images/resources_views.png)
 - CURL (if applicable): 
   - You will find it in the laravel-auto-crud folder under the name curl.txt.
 ```bash
