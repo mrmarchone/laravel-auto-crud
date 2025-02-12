@@ -1,0 +1,101 @@
+<?php
+namespace {{ namespace }};
+
+use {{ modelNamespace }};
+use {{ repositoryNamespace }};
+use Exception;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+
+class {{ class }}
+{
+	/**
+     * @var {{ repository }} ${{ repositoryVariable }}
+     */
+    protected ${{ repositoryVariable }};
+
+    /**
+     * DummyClass constructor.
+     *
+     * @param {{ repository }} ${{ repositoryVariable }}
+     */
+    public function __construct({{ repository }} ${{ repositoryVariable }})
+    {
+        $this->{{ repositoryVariable }} = ${{ repositoryVariable }};
+    }
+
+    /**
+     * Get all {{ repositoryVariable }}.
+     *
+     * @return String
+     */
+    public function getAll()
+    {
+        return $this->{{ repositoryVariable }}->all();
+    }
+
+    /**
+     * Get {{ repositoryVariable }} by id.
+     *
+     * @param $id
+     * @return String
+     */
+    public function getById(int $id)
+    {
+        return $this->{{ repositoryVariable }}->getById($id);
+    }
+
+    /**
+     * Validate {{ repositoryVariable }} data.
+     * Store to DB if there are no errors.
+     *
+     * @param array $data
+     * @return String
+     */
+    public function save(array $data)
+    {
+        return $this->{{ repositoryVariable }}->save($data);
+    }
+
+    /**
+     * Update {{ repositoryVariable }} data
+     * Store to DB if there are no errors.
+     *
+     * @param array $data
+     * @return String
+     */
+    public function update(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            ${{ repositoryVariable }} = $this->{{ repositoryVariable }}->update($data, $id);
+            DB::commit();
+            return ${{ repositoryVariable }};
+        } catch (Exception $e) {
+            DB::rollBack();
+            report($e);
+            throw new InvalidArgumentException('Unable to update post data');
+        }
+    }
+
+    /**
+     * Delete {{ repositoryVariable }} by id.
+     *
+     * @param $id
+     * @return String
+     */
+    public function deleteById(int $id)
+    {
+        DB::beginTransaction();
+        try {
+            ${{ repositoryVariable }} = $this->{{ repositoryVariable }}->delete($id);
+            DB::commit();
+            return ${{ repositoryVariable }};
+        } catch (Exception $e) {
+            DB::rollBack();
+            report($e);
+            throw new InvalidArgumentException('Unable to delete post data');
+        }
+    }
+
+}

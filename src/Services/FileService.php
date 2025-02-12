@@ -8,7 +8,7 @@ use function Laravel\Prompts\spin;
 
 class FileService
 {
-    public function createFromStub(array $modelData, string $stubType, string $basePath, string $suffix, ?callable $dataCallback = null): string
+    public function createFromStub(array $modelData, string $stubType, string $basePath, string $suffix, bool $overwrite = false, ?callable $dataCallback = null): string
     {
         $stubPath = __DIR__ . "/../Stubs/{$stubType}.stub";
         $namespace = 'App\\' . str_replace('/', '\\', $basePath);
@@ -19,12 +19,14 @@ class FileService
 
         $filePath = $this->generateFilePath($modelData, $basePath, $suffix);
 
-        if (file_exists($filePath)) {
-            $overwrite = confirm(
-                label: ucfirst($stubType) . " file already exists, do you want to overwrite it? " . $filePath,
-            );
-            if (!$overwrite) {
-                return $namespace . '\\' . $modelData['modelName'] . $suffix;
+        if (!$overwrite) {
+            if (file_exists($filePath)) {
+                $overwrite = confirm(
+                    label: ucfirst($suffix) . " file already exists, do you want to overwrite it? " . $filePath
+                );
+                if (!$overwrite) {
+                    return $namespace . '\\' . $modelData['modelName'] . $suffix;
+                }
             }
         }
 

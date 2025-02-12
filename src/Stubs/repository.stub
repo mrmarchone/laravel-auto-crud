@@ -1,0 +1,80 @@
+<?php
+namespace {{ namespace }};
+
+use {{ modelNamespace }};
+
+class {{ class }}
+{
+	 /**
+     * @var {{ model }}
+     */
+    protected {{ model }} ${{ modelVariable }};
+
+    /**
+     * {{ model }} constructor.
+     *
+     * @param {{ model }} ${{ modelVariable }}
+     */
+    public function __construct({{ model }} ${{ modelVariable }})
+    {
+        $this->{{ modelVariable }} = ${{ modelVariable }};
+    }
+
+    /**
+     * Get all {{ modelVariable }}.
+     *
+     * @return {{ model }} ${{ modelVariable }}
+     */
+    public function all()
+    {
+        return $this->{{ modelVariable }}->get();
+    }
+
+     /**
+     * Get {{ modelVariable }} by id
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function getById(int $id)
+    {
+        return $this->{{ modelVariable }}->find($id);
+    }
+
+    /**
+     * Save {{ model }}
+     *
+     * @param $data
+     * @return {{ model }}
+     */
+     public function save(array $data)
+    {
+        return {{ model }}::create($data);
+    }
+
+     /**
+     * Update {{ model }}
+     *
+     * @param $data
+     * @return {{ model }}
+     */
+    public function update(array $data, int $id)
+    {
+        ${{ modelVariable }} = $this->{{ modelVariable }}->find($id);
+        ${{ modelVariable }}->update($data);
+        return ${{ modelVariable }};
+    }
+
+    /**
+     * Delete {{ model }}
+     *
+     * @param $data
+     * @return {{ model }}
+     */
+   	 public function delete(int $id)
+    {
+        ${{ modelVariable }} = $this->{{ modelVariable }}->find($id);
+        ${{ modelVariable }}->delete();
+        return ${{ modelVariable }};
+    }
+}

@@ -5,48 +5,62 @@ namespace {{ namespace }};
 use App\Http\Controllers\Controller;
 use {{ requestNamespace }};
 use {{ resourceNamespace }};
-use {{ modelNamespace }};
+use {{ serviceNamespace }};
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class {{ class }} extends Controller
 {
+    /**
+     * @var {{ service }}
+     */
+    protected {{ service }} ${{ serviceVariable }};
+
+    /**
+     * DummyModel Constructor
+     *
+     * @param {{ service }} ${{ serviceVariable }}
+     *
+     */
+    public function __construct({{ service }} ${{ serviceVariable }})
+    {
+        $this->{{ serviceVariable }} = ${{ serviceVariable }};
+    }
+
     public function index(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        return {{ resource }}::collection({{ model }}::latest()->paginate(10));
+        return {{ resource }}::collection($this->{{ serviceVariable }}->getAll());
     }
 
     public function store({{ request }} $request): {{ resource }}|\Illuminate\Http\JsonResponse
     {
         try {
-            ${{ modelVariable }} = {{ model }}::create($request->validated());
-            return new {{ resource }}(${{ modelVariable }});
+            return new {{ resource }}($this->{{ serviceVariable }}->save($request->validated()));
         } catch (\Exception $exception) {
             report($exception);
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function show({{ model }} ${{ modelVariable }}): {{ resource }}
+    public function show(int $id): {{ resource }}
     {
-        return {{ resource }}::make(${{ modelVariable }});
+        return {{ resource }}::make($this->{{ serviceVariable }}->getById($id));
     }
 
-    public function update({{ request }} $request, {{ model }} ${{ modelVariable }}): {{ resource }}|\Illuminate\Http\JsonResponse
+    public function update({{ request }} $request, int $id): {{ resource }}|\Illuminate\Http\JsonResponse
     {
         try {
-            ${{ modelVariable }}->update($request->validated());
-            return new {{ resource }}(${{ modelVariable }});
+            return new {{ resource }}($this->{{ serviceVariable }}->update($request->validated(), $id));
         } catch (\Exception $exception) {
             report($exception);
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\JsonResponse
+    public function destroy(int $id): \Illuminate\Http\JsonResponse
     {
         try {
-            ${{ modelVariable }}->delete();
+            $this->{{ serviceVariable }}->deleteById($id);
             return response()->json(['message' => 'Deleted successfully'], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);
