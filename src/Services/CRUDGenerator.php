@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
 
+use InvalidArgumentException;
 use Mrmarchone\LaravelAutoCrud\Builders\ControllerBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\CURLBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RepositoryBuilder;
@@ -41,25 +42,16 @@ class CRUDGenerator
     {
         $checkForType = $this->askControllerType($options['type']);
         $requestName = $this->requestBuilder->create($modelData, $options['overwrite']);
-        $repository = $this->repositoryBuilder->create($modelData, $options['overwrite']);
-        $service = $this->serviceBuilder->create($modelData, $repository, $options['overwrite']);
-        if ($checkForType === 'api') {
-            $resourceName = $this->resourceBuilder->create($modelData, $options['overwrite']);
-            if ($options['repository']) {
-                $controllerName = $this->controllerBuilder->createAPIRepository($modelData, $resourceName, $requestName, $service, $options['overwrite']);
-            } else {
-                $controllerName = $this->controllerBuilder->createAPI($modelData, $resourceName, $requestName, $options['overwrite']);
-            }
-            $this->CURLBuilder->create($modelData);
-        } elseif ($checkForType === 'web') {
-            if ($options['repository']) {
-                $controllerName = $this->controllerBuilder->createWebRepository($modelData, $requestName, $service, $options['overwrite']);
-            } else {
-                $controllerName = $this->controllerBuilder->createWeb($modelData, $requestName, $options['overwrite']);
-            }
-            $this->viewBuilder->create($modelData['modelName']);
+
+        $repository = $service = null;
+        if ($options['repository']) {
+            $repository = $this->repositoryBuilder->create($modelData, $options['overwrite']);
+            $service = $this->serviceBuilder->create($modelData, $repository, $options['overwrite']);
         }
+
+        $controllerName = $this->generateController($checkForType, $modelData, $requestName, $repository, $service, $options);
         $this->routeBuilder->create($modelData['modelName'], $controllerName, $checkForType);
+
         info('Auto CRUD files generated successfully for ' . $modelData['modelName']);
     }
 
@@ -77,5 +69,40 @@ class CRUDGenerator
             },
             hint: 'Write api or web',
         );
+    }
+
+    private function generateController($type, $modelData, $requestName, $repository, $service, $options)
+    {
+        if ($type === 'api') {
+            return $this->generateAPIController($modelData, $requestName, $repository, $service, $options);
+        }
+
+        if ($type === 'web') {
+            return $this->generateWebController($modelData, $requestName, $repository, $service, $options);
+        }
+
+        throw new InvalidArgumentException("Unsupported controller type: $type");
+    }
+
+    private function generateAPIController($modelData, $requestName, $repository, $service, $options)
+    {
+        $resourceName = $this->resourceBuilder->create($modelData, $options['overwrite']);
+
+        $controllerName = $repository
+            ? $this->controllerBuilder->createAPIRepository($modelData, $resourceName, $requestName, $service, $options['overwrite'])
+            : $this->controllerBuilder->createAPI($modelData, $resourceName, $requestName, $options['overwrite']);
+
+        $this->CURLBuilder->create($modelData);
+        return $controllerName;
+    }
+
+    private function generateWebController($modelData, $requestName, $repository, $service, $options)
+    {
+        $controllerName = $repository
+            ? $this->controllerBuilder->createWebRepository($modelData, $requestName, $service, $options['overwrite'])
+            : $this->controllerBuilder->createWeb($modelData, $requestName, $options['overwrite']);
+
+        $this->viewBuilder->create($modelData['modelName']);
+        return $controllerName;
     }
 }
