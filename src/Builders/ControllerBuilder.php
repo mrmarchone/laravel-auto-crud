@@ -27,6 +27,22 @@ class ControllerBuilder extends BaseBuilder
         });
     }
 
+    public function createAPISpatieData(array $modelData, string $spatieData, bool $overwrite = false): string
+    {
+        return $this->fileService->createFromStub($modelData, 'api_spatie_data.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($spatieData) {
+            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $spatieDataName = explode('\\', $spatieData);
+
+            return [
+                '{{ spatieDataNamespace }}' => $spatieData,
+                '{{ modelNamespace }}' => $model,
+                '{{ spatieData }}' => end($spatieDataName),
+                '{{ model }}' => $modelData['modelName'],
+                '{{ modelVariable }}' => lcfirst($modelData['modelName']),
+            ];
+        });
+    }
+
     public function createAPIRepository(array $modelData, string $resource, string $request, string $service, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'api_repository.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($resource, $request, $service) {
@@ -38,6 +54,21 @@ class ControllerBuilder extends BaseBuilder
                 '{{ resourceNamespace }}' => $resource,
                 '{{ resource }}' => end($resourceName),
                 '{{ request }}' => end($requestName),
+                '{{ serviceNamespace }}' => $service,
+                '{{ service }}' => end($serviceName),
+                '{{ serviceVariable }}' => lcfirst(end($serviceName)),
+            ];
+        });
+    }
+
+    public function createAPIRepositorySpatieData(array $modelData, string $spatieData, string $service, bool $overwrite = false): string
+    {
+        return $this->fileService->createFromStub($modelData, 'api_repository_spatie_data.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($spatieData, $service) {
+            $spatieDataName = explode('\\', $spatieData);
+            $serviceName = explode('\\', $service);
+            return [
+                '{{ spatieDataNamespace }}' => $spatieData,
+                '{{ spatieData }}' => end($spatieDataName),
                 '{{ serviceNamespace }}' => $service,
                 '{{ service }}' => end($serviceName),
                 '{{ serviceVariable }}' => lcfirst(end($serviceName)),
@@ -73,6 +104,47 @@ class ControllerBuilder extends BaseBuilder
             return [
                 '{{ requestNamespace }}' => $request,
                 '{{ request }}' => end($requestName),
+                '{{ serviceNamespace }}' => $service,
+                '{{ service }}' => end($serviceName),
+                '{{ serviceVariable }}' => lcfirst(end($serviceName)),
+                '{{ modelNamespace }}' => $model,
+                '{{ model }}' => $modelData['modelName'],
+                '{{ modelVariable }}' => lcfirst($modelData['modelName']),
+                '{{ viewPath }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+                '{{ modelPlural }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+                '{{ routeName }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+            ];
+        });
+    }
+
+    public function createWebSpatieData(array $modelData, string $spatieData, bool $overwrite = false): string
+    {
+        return $this->fileService->createFromStub($modelData, 'web_spatie_data.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($spatieData) {
+            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $spatieDataName = explode('\\', $spatieData);
+            return [
+                '{{ spatieDataNamespace }}' => $spatieData,
+                '{{ modelNamespace }}' => $model,
+                '{{ spatieData }}' => end($spatieDataName),
+                '{{ model }}' => $modelData['modelName'],
+                '{{ modelVariable }}' => lcfirst($modelData['modelName']),
+                '{{ viewPath }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+                '{{ modelPlural }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+                '{{ routeName }}' => HelperService::toSnakeCase(Str::plural($modelData['modelName'])),
+            ];
+        });
+    }
+
+    public function createWebRepositorySpatieData(array $modelData, string $spatieData, string $service, bool $overwrite = false): string
+    {
+        return $this->fileService->createFromStub($modelData, 'web_repository_spatie_data.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($service, $spatieData) {
+            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $serviceName = explode('\\', $service);
+            $spatieDataName = explode('\\', $spatieData);
+
+            return [
+                '{{ spatieDataNamespace }}' => $spatieData,
+                '{{ spatieData }}' => end($spatieDataName),
                 '{{ serviceNamespace }}' => $service,
                 '{{ service }}' => end($serviceName),
                 '{{ serviceVariable }}' => lcfirst(end($serviceName)),

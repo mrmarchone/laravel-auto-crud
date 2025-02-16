@@ -1,0 +1,49 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ spatieDataNamespace }};
+use {{ modelNamespace }};
+
+class {{ class }} extends Controller
+{
+    public function index(): \Illuminate\Contracts\View\View
+    {
+        ${{ modelPlural }} = {{ spatieData }}::collect({{ model }}::latest()->paginate(10));
+        return view('{{ viewPath }}.index', compact('{{ modelPlural }}'));
+    }
+
+    public function create(): \Illuminate\Contracts\View\View
+    {
+        return view('{{ viewPath }}.create');
+    }
+
+    public function store({{ spatieData }} $data): \Illuminate\Http\RedirectResponse
+    {
+        {{ model }}::create($data->all());
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Created successfully');
+    }
+
+    public function show({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
+    {
+        return view('{{ viewPath }}.show', compact('{{ modelVariable }}'));
+    }
+
+    public function edit({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
+    {
+        return view('{{ viewPath }}.edit', compact('{{ modelVariable }}'));
+    }
+
+    public function update({{ spatieData }} $data, {{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
+    {
+        ${{ modelVariable }}->update($data->all());
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Updated successfully');
+    }
+
+    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
+    {
+        ${{ modelVariable }}->delete();
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Deleted successfully');
+    }
+}

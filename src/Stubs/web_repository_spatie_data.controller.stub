@@ -1,0 +1,67 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ spatieDataNamespace }};
+use {{ serviceNamespace }};
+
+class {{ class }} extends Controller
+{
+    /**
+     * @var {{ service }}
+     */
+    protected {{ service }} ${{ serviceVariable }};
+
+    /**
+     * DummyModel Constructor
+     *
+     * @param {{ service }} ${{ serviceVariable }}
+     *
+     */
+    public function __construct({{ service }} ${{ serviceVariable }})
+    {
+        $this->{{ serviceVariable }} = ${{ serviceVariable }};
+    }
+
+    public function index(): \Illuminate\Contracts\View\View
+    {
+        ${{ modelPlural }} = {{ spatieData }}::collect($this->{{ serviceVariable }}->getAll());
+        return view('{{ viewPath }}.index', compact('{{ modelPlural }}'));
+    }
+
+    public function create(): \Illuminate\Contracts\View\View
+    {
+        return view('{{ viewPath }}.create');
+    }
+
+    public function store({{ spatieData }} $data): \Illuminate\Http\RedirectResponse
+    {
+        $this->{{ serviceVariable }}->save($data->all());
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Created successfully');
+    }
+
+    public function show(int $id): \Illuminate\Contracts\View\View
+    {
+        ${{ modelVariable }} = $this->{{ serviceVariable }}->getById($id);
+        return view('{{ viewPath }}.show', compact('{{ modelVariable }}'));
+    }
+
+    public function edit(int $id): \Illuminate\Contracts\View\View
+    {
+        ${{ modelVariable }} = $this->{{ serviceVariable }}->getById($id);
+        return view('{{ viewPath }}.edit', compact('{{ modelVariable }}'));
+    }
+
+    public function update({{ spatieData }} $data, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $this->{{ serviceVariable }}->update($data->all(), $id);
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Updated successfully');
+    }
+
+    public function destroy(int $id): \Illuminate\Http\RedirectResponse
+    {
+        $this->{{ serviceVariable }}->deleteById($id);
+        return redirect()->route('{{ routeName }}.index')->with('success', 'Deleted successfully');
+    }
+}

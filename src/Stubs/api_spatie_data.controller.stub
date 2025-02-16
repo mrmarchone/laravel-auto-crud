@@ -1,0 +1,54 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ spatieDataNamespace }};
+use {{ modelNamespace }};
+use Symfony\Component\HttpFoundation\Response;
+
+class {{ class }} extends Controller
+{
+    public function index(): array|\Illuminate\Contracts\Pagination\CursorPaginator|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Pagination\AbstractCursorPaginator|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Support\Collection|\Illuminate\Support\Enumerable|\Illuminate\Support\LazyCollection|\Spatie\LaravelData\CursorPaginatedDataCollection|\Spatie\LaravelData\DataCollection|\Spatie\LaravelData\PaginatedDataCollection
+    {
+        return {{ spatieData }}::collect({{ model }}::latest()->paginate(10));
+    }
+
+    public function store({{ spatieData }} $data): {{ spatieData }}|\Illuminate\Http\JsonResponse
+    {
+        try {
+            ${{ modelVariable }} = {{ model }}::create($data->all());
+            return new {{ spatieData }}(${{ modelVariable }});
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function show({{ model }} ${{ modelVariable }}): {{ spatieData }}
+    {
+        return {{ spatieData }}::from(${{ modelVariable }});
+    }
+
+    public function update({{ spatieData }} $data, {{ model }} ${{ modelVariable }}): {{ spatieData }}|\Illuminate\Http\JsonResponse
+    {
+        try {
+            ${{ modelVariable }}->update($data->all());
+            return {{ spatieData }}::from(${{ modelVariable }});
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\JsonResponse
+    {
+        try {
+            ${{ modelVariable }}->delete();
+            return response()->json(['message' => 'Deleted successfully'], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}

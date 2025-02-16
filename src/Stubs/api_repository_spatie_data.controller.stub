@@ -1,0 +1,69 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use {{ spatieDataNamespace }};
+use {{ serviceNamespace }};
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class {{ class }} extends Controller
+{
+    /**
+     * @var {{ service }}
+     */
+    protected {{ service }} ${{ serviceVariable }};
+
+    /**
+     * DummyModel Constructor
+     *
+     * @param {{ service }} ${{ serviceVariable }}
+     *
+     */
+    public function __construct({{ service }} ${{ serviceVariable }})
+    {
+        $this->{{ serviceVariable }} = ${{ serviceVariable }};
+    }
+
+    public function index(): array|\Illuminate\Contracts\Pagination\CursorPaginator|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Pagination\AbstractCursorPaginator|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Support\Collection|\Illuminate\Support\Enumerable|\Illuminate\Support\LazyCollection|\Spatie\LaravelData\CursorPaginatedDataCollection|\Spatie\LaravelData\DataCollection|\Spatie\LaravelData\PaginatedDataCollection
+    {
+        return {{ spatieData }}::collect($this->{{ serviceVariable }}->getAll());
+    }
+
+    public function store({{ spatieData }} $data): {{ spatieData }}|\Illuminate\Http\JsonResponse
+    {
+        try {
+            return {{ spatieData }}::from($this->{{ serviceVariable }}->save($data->all()));
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function show(int $id): {{ spatieData }}
+    {
+        return {{ spatieData }}::from($this->{{ serviceVariable }}->getById($id));
+    }
+
+    public function update({{ spatieData }} $data, int $id): {{ spatieData }}|\Illuminate\Http\JsonResponse
+    {
+        try {
+            return {{ spatieData }}::from($this->{{ serviceVariable }}->update($data->all(), $id));
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy(int $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $this->{{ serviceVariable }}->deleteById($id);
+            return response()->json(['message' => 'Deleted successfully'], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}

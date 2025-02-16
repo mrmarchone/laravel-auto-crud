@@ -34,23 +34,20 @@ Usage:
   auto-crud:generate [options]
 
 Options:
-  -M, --model[=MODEL]   Select one or more of your models. (multiple values allowed)
-  -T, --type[=TYPE]     Select weather api or web.
-  -R, --repository      Working with repository design pattern
-  -O, --overwrite       Overwrite the files if already exists.
-  -h, --help            Display help for the given command. When no command is given display help for the list command
-      --silent          Do not output any message
-  -q, --quiet           Only errors are displayed. All other output is suppressed
-  -V, --version         Display this application version
-      --ansi|--no-ansi  Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction  Do not ask any interactive question
-      --env[=ENV]       The environment the command should run under
+  -M, --model[=MODEL]      Select one or more of your models. (multiple values allowed)
+  -T, --type[=TYPE]        Select weather api or web.
+  -R, --repository         Working with repository design pattern
+  -O, --overwrite          Overwrite the files if already exists.
+  -P, --pattern[=PATTERN]  Supports Spatie-Data Pattern.
+  -h, --help               Display help for the given command. When no command is given display help for the list command
+      --silent             Do not output any message
+  -q, --quiet              Only errors are displayed. All other output is suppressed
 ```
 
 ### Example:
 
 ```bash
-php artisan auto-crud:generate --model=User --model=Manager --overwrite --type=api --repository
+php artisan auto-crud:generate --model=User --model=Manager --overwrite --type=api --repository --pattern=spatie-data
 ```
 
 ![Views](images/command.png)
@@ -108,6 +105,63 @@ class UserController extends Controller
         try {
             $user->delete();
             return response()->json(['message' => 'Deleted successfully'], Response::HTTP_NO_CONTENT);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+```
+- API Controller with Spatie Data (if applicable):
+```php
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use App\Data\UserData;
+use App\Models\User;
+use Symfony\Component\HttpFoundation\Response;
+
+class UserController extends Controller
+{
+    public function index(): array|\Illuminate\Contracts\Pagination\CursorPaginator|\Illuminate\Contracts\Pagination\Paginator|\Illuminate\Pagination\AbstractCursorPaginator|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Support\Collection|\Illuminate\Support\Enumerable|\Illuminate\Support\LazyCollection|\Spatie\LaravelData\CursorPaginatedDataCollection|\Spatie\LaravelData\DataCollection|\Spatie\LaravelData\PaginatedDataCollection
+    {
+        return UserData::collect(User::latest()->paginate(10));
+    }
+
+    public function store(UserData $data): UserData|\Illuminate\Http\JsonResponse
+    {
+        try {
+            $user = User::create($data->all());
+            return new UserData($user);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function show(User $user): UserData
+    {
+        return UserData::from($user);
+    }
+
+    public function update(UserData $data, User $user): UserData|\Illuminate\Http\JsonResponse
+    {
+        try {
+            $user->update($data->all());
+            return UserData::from($user);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function destroy(User $user): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $user->delete();
+            return response()->json(['message' => 'Deleted successfully'], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -232,6 +286,58 @@ class UserController extends Controller
     public function update(UserRequest $request, User $user): \Illuminate\Http\RedirectResponse
     {
         $user->update($request->validated());
+        return redirect()->route('users.index')->with('success', 'Updated successfully');
+    }
+
+    public function destroy(User $user): \Illuminate\Http\RedirectResponse
+    {
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'Deleted successfully');
+    }
+}
+```
+- Web Controller with Spatie Data (if applicable):
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Data\UserData;
+use App\Models\User;
+
+class UserController extends Controller
+{
+    public function index(): \Illuminate\Contracts\View\View
+    {
+        $users = UserData::collect(User::latest()->paginate(10));
+        return view('users.index', compact('users'));
+    }
+
+    public function create(): \Illuminate\Contracts\View\View
+    {
+        return view('users.create');
+    }
+
+    public function store(UserData $data): \Illuminate\Http\RedirectResponse
+    {
+        User::create($data->all());
+        return redirect()->route('users.index')->with('success', 'Created successfully');
+    }
+
+    public function show(User $user): \Illuminate\Contracts\View\View
+    {
+        return view('users.show', compact('user'));
+    }
+
+    public function edit(User $user): \Illuminate\Contracts\View\View
+    {
+        return view('users.edit', compact('user'));
+    }
+
+    public function update(UserData $data, User $user): \Illuminate\Http\RedirectResponse
+    {
+        $user->update($data->all());
         return redirect()->route('users.index')->with('success', 'Updated successfully');
     }
 
@@ -624,10 +730,55 @@ class UserService
 
 }
 ```
+- Spatie Data (if applicable):
+```php
+<?php
+
+namespace App\Data;
+
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Max;
+use Spatie\LaravelData\Attributes\Validation\Unique;
+use Spatie\LaravelData\Attributes\Validation\Date;
+use Carbon\Carbon;
+
+
+class UserData extends Data
+{
+    #[Max(255)]
+    public string $name;
+    #[Max(255), Unique('users', 'email')]
+    public string $email;
+    #[Date]
+    public ?Carbon $email_verified_at;
+    #[Max(255)]
+    public string $password;
+    #[Max(100)]
+    public ?string $remember_token;
+
+}
+```
+
+- Enum (if applicable):
+```php
+<?php
+
+namespace App\Enums;
+
+enum TestingDataTypeEnum: string
+{
+    case small = 'small';
+    case medium = 'medium';
+    case large = 'large';
+
+}
+```
+
 ## Requirements
 
 - Laravel 10+
-- PHP 8.0+
+- PHP 8.1+
+- Laravel Data Spatie *
 
 ## Contributing
 
