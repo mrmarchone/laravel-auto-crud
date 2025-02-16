@@ -26,7 +26,9 @@ To generate CRUD operations for a model, use the following Artisan command:
 
 ```bash
 php artisan auto-crud:generate -h
+```
 
+```textmate
 Description:
   A command to create auto CRUD for your models.
 
@@ -39,15 +41,22 @@ Options:
   -R, --repository         Working with repository design pattern
   -O, --overwrite          Overwrite the files if already exists.
   -P, --pattern[=PATTERN]  Supports Spatie-Data Pattern.
+  -C, --curl               Generate CURL Requests for API.
   -h, --help               Display help for the given command. When no command is given display help for the list command
       --silent             Do not output any message
   -q, --quiet              Only errors are displayed. All other output is suppressed
+  -V, --version            Display this application version
+      --ansi|--no-ansi     Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction     Do not ask any interactive question
+      --env[=ENV]          The environment the command should run under
+  -PM, --postman           Generate Postman Collection for API.
+  -v|vv|vvv, --verbose     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 ```
 
 ### Example:
 
 ```bash
-php artisan auto-crud:generate --model=User --model=Manager --overwrite --type=api --repository --pattern=spatie-data
+php artisan auto-crud:generate --model=User --model=Manager --overwrite --type=api --repository --pattern=spatie-data --curl --postman
 ```
 
 ![Views](images/command.png)
@@ -499,6 +508,8 @@ Route::resource('/users', App\Http\Controllers\UserController::class);
 
 - CURL (if applicable): 
   - You will find it in the laravel-auto-crud folder under the name curl.txt.
+- Postman Collection (if applicable):
+    - You will find it in the laravel-auto-crud folder under the name postman.json.
 ```bash
 =====================User=====================
 curl --location 'http://127.0.0.1:8000/api/users' \

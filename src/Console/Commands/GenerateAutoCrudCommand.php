@@ -16,7 +16,7 @@ class GenerateAutoCrudCommand extends Command
 {
     private DatabaseValidatorService $databaseValidatorService;
     private CRUDGenerator $CRUDGenerator;
-    protected $signature = 'auto-crud:generate {--M|model=* : Select one or more of your models.} {--T|type= : Select weather api or web.} {--R|repository : Working with repository design pattern} {--O|overwrite : Overwrite the files if already exists.} {--P|pattern= : Supports Spatie-Data Pattern.}';
+    protected $signature = 'auto-crud:generate {--M|model=* : Select one or more of your models.} {--T|type= : Select weather api or web.} {--R|repository : Working with repository design pattern} {--O|overwrite : Overwrite the files if already exists.} {--P|pattern= : Supports Spatie-Data Pattern.} {--C|curl : Generate CURL Requests for API.} {--PM|postman : Generate Postman Collection for API.}';
 
     protected $description = 'A command to create auto CRUD for your models.';
 

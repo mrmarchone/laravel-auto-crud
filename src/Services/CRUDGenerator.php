@@ -6,6 +6,7 @@ namespace Mrmarchone\LaravelAutoCrud\Services;
 use InvalidArgumentException;
 use Mrmarchone\LaravelAutoCrud\Builders\ControllerBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\CURLBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\PostmanBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RepositoryBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RequestBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ResourceBuilder;
@@ -28,9 +29,12 @@ class CRUDGenerator
     private ServiceBuilder $serviceBuilder;
     private SpatieDataBuilder $spatieDataBuilder;
 
+    private PostmanBuilder $postmanBuilder;
+
     public function __construct()
     {
         $this->CURLBuilder = new CURLBuilder();
+        $this->postmanBuilder = new PostmanBuilder();
         $this->controllerBuilder = new ControllerBuilder();
         $this->resourceBuilder = new ResourceBuilder();
         $this->requestBuilder = new RequestBuilder();
@@ -110,7 +114,14 @@ class CRUDGenerator
                 : $this->controllerBuilder->createAPI($modelData, $resourceName, $requestName, $options['overwrite']);
         }
 
-        $this->CURLBuilder->create($modelData);
+        if ($options['postman']) {
+            $this->postmanBuilder->create($modelData);
+        }
+
+        if ($options['curl']) {
+            $this->CURLBuilder->create($modelData);
+        }
+
         return $controllerName;
     }
 
