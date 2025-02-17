@@ -11,7 +11,7 @@ class ControllerBuilder extends BaseBuilder
     public function createAPI(array $modelData, string $resource, string $request, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'api.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($resource, $request) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $resourceName = explode('\\', $resource);
             $requestName = explode('\\', $request);
 
@@ -30,7 +30,7 @@ class ControllerBuilder extends BaseBuilder
     public function createAPISpatieData(array $modelData, string $spatieData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'api_spatie_data.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($spatieData) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $spatieDataName = explode('\\', $spatieData);
 
             return [
@@ -79,7 +79,7 @@ class ControllerBuilder extends BaseBuilder
     public function createWeb(array $modelData, string $request, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'web.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($request) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $requestName = explode('\\', $request);
             return [
                 '{{ requestNamespace }}' => $request,
@@ -97,7 +97,7 @@ class ControllerBuilder extends BaseBuilder
     public function createWebRepository(array $modelData, string $request, string $service, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'web_repository.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($service, $request) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $serviceName = explode('\\', $service);
             $requestName = explode('\\', $request);
 
@@ -120,7 +120,7 @@ class ControllerBuilder extends BaseBuilder
     public function createWebSpatieData(array $modelData, string $spatieData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'web_spatie_data.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($spatieData) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $spatieDataName = explode('\\', $spatieData);
             return [
                 '{{ spatieDataNamespace }}' => $spatieData,
@@ -138,7 +138,7 @@ class ControllerBuilder extends BaseBuilder
     public function createWebRepositorySpatieData(array $modelData, string $spatieData, string $service, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'web_repository_spatie_data.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($service, $spatieData) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
+            $model = $this->getFullModelNamespace($modelData);
             $serviceName = explode('\\', $service);
             $spatieDataName = explode('\\', $spatieData);
 

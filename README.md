@@ -20,6 +20,15 @@ You can install the package via Composer:
 composer require mrmarchone/laravel-auto-crud --dev
 ```
 
+## Publish Configuration
+
+You can publish the configuration file via:
+
+```bash
+php artisan vendor:publish --provider="Mrmarchone\LaravelAutoCrud\LaravelAutoCrudServiceProvider" --tag="auto-crud-config"
+```
+
+
 ## Usage
 
 To generate CRUD operations for a model, use the following Artisan command:
@@ -36,27 +45,32 @@ Usage:
   auto-crud:generate [options]
 
 Options:
-  -M, --model[=MODEL]      Select one or more of your models. (multiple values allowed)
-  -T, --type[=TYPE]        Select weather api or web.
-  -R, --repository         Working with repository design pattern
-  -O, --overwrite          Overwrite the files if already exists.
-  -P, --pattern[=PATTERN]  Supports Spatie-Data Pattern.
-  -C, --curl               Generate CURL Requests for API.
-  -h, --help               Display help for the given command. When no command is given display help for the list command
-      --silent             Do not output any message
-  -q, --quiet              Only errors are displayed. All other output is suppressed
-  -V, --version            Display this application version
-      --ansi|--no-ansi     Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction     Do not ask any interactive question
-      --env[=ENV]          The environment the command should run under
-  -PM, --postman           Generate Postman Collection for API.
-  -v|vv|vvv, --verbose     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+  -M, --model[=MODEL]             Select one or more of your models. (multiple values allowed)
+  -T, --type[=TYPE]               Select weather api or web.
+  -R, --repository                Working with repository design pattern
+  -O, --overwrite                 Overwrite the files if already exists.
+  -P, --pattern[=PATTERN]         Supports Spatie-Data Pattern.
+  -C, --curl                      Generate CURL Requests for API.
+  -h, --help                      Display help for the given command. When no command is given display help for the list command
+      --silent                    Do not output any message
+  -q, --quiet                     Only errors are displayed. All other output is suppressed
+  -V, --version                   Display this application version
+      --ansi|--no-ansi            Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction            Do not ask any interactive question
+      --env[=ENV]                 The environment the command should run under
+  -MP, --model-path[=MODEL-PATH]  Set models path.
+  -PM, --postman                  Generate Postman Collection for API.
+  -v|vv|vvv, --verbose            Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 ```
+
+> ⚠️ **Warning**  
+> Take care when you create a models outside app directory, because command will generate the folder structure in all folders like Controllers, Resources, Requests, etc.  
+> Example (Models Path) => AnotherModels/Models , this will generate files like this one app/Http/Controllers/AnotherModels/Models/ModelController.php
 
 ### Example:
 
 ```bash
-php artisan auto-crud:generate --model=User --model=Manager --overwrite --type=api --repository --pattern=spatie-data --curl --postman
+php artisan auto-crud:generate --model-path=app/AnotherModels --model=User --model=Manager --overwrite --type=api --repository --pattern=spatie-data --curl --postman
 ```
 
 ![Views](images/command.png)

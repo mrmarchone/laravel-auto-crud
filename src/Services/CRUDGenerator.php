@@ -4,34 +4,31 @@ declare(strict_types=1);
 namespace Mrmarchone\LaravelAutoCrud\Services;
 
 use InvalidArgumentException;
-use Mrmarchone\LaravelAutoCrud\Builders\ControllerBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\CURLBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\PostmanBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\RepositoryBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\RequestBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\ResourceBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\RouteBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\ServiceBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\SpatieDataBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\ViewBuilder;
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\text;
+use Mrmarchone\LaravelAutoCrud\Builders\{ControllerBuilder,
+    CURLBuilder,
+    PostmanBuilder,
+    RepositoryBuilder,
+    RequestBuilder,
+    ResourceBuilder,
+    RouteBuilder,
+    ServiceBuilder,
+    SpatieDataBuilder,
+    ViewBuilder
+};
+use function Laravel\Prompts\{info, text};
 
 class CRUDGenerator
 {
-    private CURLBuilder $CURLBuilder;
-    private ControllerBuilder $controllerBuilder;
-    private ResourceBuilder $resourceBuilder;
-    private RequestBuilder $requestBuilder;
-    private RouteBuilder $routeBuilder;
-    private ViewBuilder $viewBuilder;
-    private RepositoryBuilder $repositoryBuilder;
-    private ServiceBuilder $serviceBuilder;
-    private SpatieDataBuilder $spatieDataBuilder;
-
-    private PostmanBuilder $postmanBuilder;
-
-    public function __construct()
+    public function __construct(private CURLBuilder       $CURLBuilder,
+                                private ControllerBuilder $controllerBuilder,
+                                private ResourceBuilder   $resourceBuilder,
+                                private RequestBuilder    $requestBuilder,
+                                private RouteBuilder      $routeBuilder,
+                                private ViewBuilder       $viewBuilder,
+                                private RepositoryBuilder $repositoryBuilder,
+                                private ServiceBuilder    $serviceBuilder,
+                                private SpatieDataBuilder $spatieDataBuilder,
+                                private PostmanBuilder    $postmanBuilder)
     {
         $this->CURLBuilder = new CURLBuilder();
         $this->postmanBuilder = new PostmanBuilder();

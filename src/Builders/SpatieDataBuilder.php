@@ -22,7 +22,6 @@ class SpatieDataBuilder extends BaseBuilder
     public function create(array $modelData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'spatie_data', 'Data', 'Data', $overwrite, function ($modelData) use ($overwrite) {
-            $model = $modelData['namespace'] ? 'App\\Models\\' . $modelData['namespace'] . '\\' . $modelData['modelName'] : 'App\\Models\\' . $modelData['modelName'];
             $supportedData = $this->getHelperData($modelData, $overwrite);
             return [
                 '{{ namespaces }}' => SpatieDataTransformer::convertNamespacesToString($supportedData['namespaces']),

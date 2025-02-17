@@ -13,4 +13,9 @@ abstract class BaseBuilder
     {
         $this->fileService = new FileService();
     }
+
+    protected function getFullModelNamespace(array $modelData): string
+    {
+        return $modelData['namespace'] ? $modelData['namespace'] . '\\' . $modelData['modelName'] : $modelData['modelName'];
+    }
 }
