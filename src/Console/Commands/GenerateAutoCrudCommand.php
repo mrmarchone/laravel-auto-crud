@@ -1,11 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Console\Commands;
 
 use Illuminate\Console\Command;
-use Mrmarchone\LaravelAutoCrud\Services\{CRUDGenerator, DatabaseValidatorService, HelperService, ModelService};
-use function Laravel\Prompts\{confirm, alert};
+use Mrmarchone\LaravelAutoCrud\Services\CRUDGenerator;
+use Mrmarchone\LaravelAutoCrud\Services\DatabaseValidatorService;
+use Mrmarchone\LaravelAutoCrud\Services\HelperService;
+use Mrmarchone\LaravelAutoCrud\Services\ModelService;
+
+use function Laravel\Prompts\alert;
+use function Laravel\Prompts\confirm;
 
 class GenerateAutoCrudCommand extends Command
 {
@@ -23,9 +29,8 @@ class GenerateAutoCrudCommand extends Command
 
     public function __construct(
         protected DatabaseValidatorService $databaseValidatorService,
-        protected CRUDGenerator            $CRUDGenerator
-    )
-    {
+        protected CRUDGenerator $CRUDGenerator
+    ) {
         parent::__construct();
     }
 
@@ -35,7 +40,7 @@ class GenerateAutoCrudCommand extends Command
 
         HelperService::displaySignature();
 
-        if (!$this->everythingIsOk()) {
+        if (! $this->everythingIsOk()) {
             return;
         }
 
@@ -43,8 +48,9 @@ class GenerateAutoCrudCommand extends Command
         if (count($this->option('model'))) {
             foreach ($this->option('model') as $model) {
                 $modelExists = ModelService::isModelExists($model, $modelPath);
-                if (!$modelExists) {
-                    alert('Model ' . $model . ' does not exist');
+                if (! $modelExists) {
+                    alert('Model '.$model.' does not exist');
+
                     continue;
                 }
                 $models[] = $modelExists;
@@ -55,6 +61,7 @@ class GenerateAutoCrudCommand extends Command
 
         if (empty($models)) {
             alert("Can't find models, if the models folder outside app directory , make sure it's already loaded in psr-4.");
+
             return;
         }
 
@@ -66,12 +73,13 @@ class GenerateAutoCrudCommand extends Command
         foreach ($models as $model) {
             $modelData = ModelService::resolveModelName($model);
             $table = ModelService::getFullModelNamespace($modelData);
-            if (!$this->databaseValidatorService->checkTableExists($table)) {
+            if (! $this->databaseValidatorService->checkTableExists($table)) {
                 $createFiles = confirm(
-                    label: 'Table ' . $table . ' not found, Do you want to create empty auto CRUD files?.'
+                    label: 'Table '.$table.' not found, Do you want to create empty auto CRUD files?.'
                 );
-                if (!$createFiles) {
-                    alert('Auto CRUD files not generated for model ' . $model . '.');
+                if (! $createFiles) {
+                    alert('Auto CRUD files not generated for model '.$model.'.');
+
                     continue;
                 }
             }
@@ -81,22 +89,24 @@ class GenerateAutoCrudCommand extends Command
 
     private function everythingIsOk(): bool
     {
-        if (!$this->databaseValidatorService->checkDataBaseConnection()) {
+        if (! $this->databaseValidatorService->checkDataBaseConnection()) {
             alert('DB Connection Error.');
+
             return false;
         }
 
-        if ($this->option('type') && !in_array($this->option('type'), ['api', 'web'])) {
+        if ($this->option('type') && ! in_array($this->option('type'), ['api', 'web'])) {
             alert('Make sure that the type is "api" or "web".');
+
             return false;
         }
 
-        if ($this->option('pattern') == 'spatie-data' && !class_exists(\Spatie\LaravelData\Data::class)) {
+        if ($this->option('pattern') == 'spatie-data' && ! class_exists(\Spatie\LaravelData\Data::class)) {
             alert('Make sure that the "spatie-data" package is installed."');
+
             return false;
         }
 
         return true;
     }
 }
-

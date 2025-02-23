@@ -1,45 +1,47 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
 
 use InvalidArgumentException;
-use Mrmarchone\LaravelAutoCrud\Builders\{ControllerBuilder,
-    CURLBuilder,
-    PostmanBuilder,
-    RepositoryBuilder,
-    RequestBuilder,
-    ResourceBuilder,
-    RouteBuilder,
-    ServiceBuilder,
-    SpatieDataBuilder,
-    ViewBuilder
-};
-use function Laravel\Prompts\{info, text};
+use Mrmarchone\LaravelAutoCrud\Builders\ControllerBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\CURLBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\PostmanBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\RepositoryBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\RequestBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\ResourceBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\RouteBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\ServiceBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\SpatieDataBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\ViewBuilder;
+
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\text;
 
 class CRUDGenerator
 {
-    public function __construct(private CURLBuilder       $CURLBuilder,
-                                private ControllerBuilder $controllerBuilder,
-                                private ResourceBuilder   $resourceBuilder,
-                                private RequestBuilder    $requestBuilder,
-                                private RouteBuilder      $routeBuilder,
-                                private ViewBuilder       $viewBuilder,
-                                private RepositoryBuilder $repositoryBuilder,
-                                private ServiceBuilder    $serviceBuilder,
-                                private SpatieDataBuilder $spatieDataBuilder,
-                                private PostmanBuilder    $postmanBuilder)
+    public function __construct(private CURLBuilder $CURLBuilder,
+        private ControllerBuilder $controllerBuilder,
+        private ResourceBuilder $resourceBuilder,
+        private RequestBuilder $requestBuilder,
+        private RouteBuilder $routeBuilder,
+        private ViewBuilder $viewBuilder,
+        private RepositoryBuilder $repositoryBuilder,
+        private ServiceBuilder $serviceBuilder,
+        private SpatieDataBuilder $spatieDataBuilder,
+        private PostmanBuilder $postmanBuilder)
     {
-        $this->CURLBuilder = new CURLBuilder();
-        $this->postmanBuilder = new PostmanBuilder();
-        $this->controllerBuilder = new ControllerBuilder();
-        $this->resourceBuilder = new ResourceBuilder();
-        $this->requestBuilder = new RequestBuilder();
-        $this->routeBuilder = new RouteBuilder();
-        $this->viewBuilder = new ViewBuilder();
-        $this->repositoryBuilder = new RepositoryBuilder();
-        $this->serviceBuilder = new ServiceBuilder();
-        $this->spatieDataBuilder = new SpatieDataBuilder();
+        $this->CURLBuilder = new CURLBuilder;
+        $this->postmanBuilder = new PostmanBuilder;
+        $this->controllerBuilder = new ControllerBuilder;
+        $this->resourceBuilder = new ResourceBuilder;
+        $this->requestBuilder = new RequestBuilder;
+        $this->routeBuilder = new RouteBuilder;
+        $this->viewBuilder = new ViewBuilder;
+        $this->repositoryBuilder = new RepositoryBuilder;
+        $this->serviceBuilder = new ServiceBuilder;
+        $this->spatieDataBuilder = new SpatieDataBuilder;
     }
 
     public function generate($modelData, array $options): void
@@ -66,19 +68,20 @@ class CRUDGenerator
         $controllerName = $this->generateController($checkForType, $modelData, $data, $options);
         $this->routeBuilder->create($modelData['modelName'], $controllerName, $checkForType);
 
-        info('Auto CRUD files generated successfully for ' . $modelData['modelName']);
+        info('Auto CRUD files generated successfully for '.$modelData['modelName']);
     }
 
-    private function askControllerType(string $type = null): string
+    private function askControllerType(?string $type = null): string
     {
         return $type ?? text(
             label: 'Do you want to create an api or web controller?',
             default: 'api',
             required: true,
             validate: function ($value) {
-                if (!in_array(strtolower($value), ['api', 'web'])) {
+                if (! in_array(strtolower($value), ['api', 'web'])) {
                     return 'Please enter a valid type api or web';
                 }
+
                 return null;
             },
             hint: 'Write api or web',
@@ -98,7 +101,7 @@ class CRUDGenerator
         throw new InvalidArgumentException("Unsupported controller type: $type");
     }
 
-    private function generateAPIController(array $modelData, string $requestName, string $repository, string $service, array $options, string $spatieData = null): string
+    private function generateAPIController(array $modelData, string $requestName, string $repository, string $service, array $options, ?string $spatieData = null): string
     {
         if ($options['pattern'] == 'spatie-data') {
             $controllerName = $repository
@@ -135,6 +138,7 @@ class CRUDGenerator
         }
 
         $this->viewBuilder->create($modelData['modelName']);
+
         return $controllerName;
     }
 }

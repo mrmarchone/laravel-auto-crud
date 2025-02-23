@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -13,8 +14,8 @@ class CURLBuilder
 {
     public function create(array $modelData)
     {
-        $laravelAutoCrudPath = base_path("laravel-auto-crud");
-        if (!file_exists($laravelAutoCrudPath)) {
+        $laravelAutoCrudPath = base_path('laravel-auto-crud');
+        if (! file_exists($laravelAutoCrudPath)) {
             mkdir($laravelAutoCrudPath, 0755, true);
         }
 
@@ -29,14 +30,14 @@ class CURLBuilder
             ['GET', ''],
             ['GET', '/:id'],
         ];
-        file_put_contents($laravelAutoCrudPath . '/curl.txt', "====================={$modelData['modelName']}=====================" . "\n", FILE_APPEND);
+        file_put_contents($laravelAutoCrudPath.'/curl.txt', "====================={$modelData['modelName']}====================="."\n", FILE_APPEND);
         foreach ($endpoints as $endpoint) {
             [$method, $path] = $endpoint;
             $data = $endpoint[2] ?? [];
-            $curlCommand = $this->generateCurlCommand($method, $routeBase . $path, $data);
-            file_put_contents($laravelAutoCrudPath . '/curl.txt', $curlCommand . "\n\n", FILE_APPEND);
+            $curlCommand = $this->generateCurlCommand($method, $routeBase.$path, $data);
+            file_put_contents($laravelAutoCrudPath.'/curl.txt', $curlCommand."\n\n", FILE_APPEND);
         }
-        file_put_contents($laravelAutoCrudPath . '/curl.txt', "====================={$modelData['modelName']}=====================" . "\n", FILE_APPEND);
+        file_put_contents($laravelAutoCrudPath.'/curl.txt', "====================={$modelData['modelName']}====================="."\n", FILE_APPEND);
     }
 
     private function generateCurlCommand(string $method, string $url, array $data = []): string
@@ -50,10 +51,11 @@ class CURLBuilder
         if (in_array($method, ['POST', 'PATCH'])) {
             $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             $curlCommand .= "--request {$method} \\\n";
-            $curlCommand .= "--data '" . $jsonData . "'";
+            $curlCommand .= "--data '".$jsonData."'";
         } else {
             $curlCommand .= "--request {$method}";
         }
+
         return $curlCommand;
     }
 
@@ -72,8 +74,8 @@ class CURLBuilder
             switch ($driver) {
                 case 'mysql':
                 case 'pgsql':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $column]);
-                    if (!empty($columnDetails) && isset($columnDetails[0]->COLUMN_KEY)) {
+                    $columnDetails = DB::select('SELECT COLUMN_NAME, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
+                    if (! empty($columnDetails) && isset($columnDetails[0]->COLUMN_KEY)) {
                         $isPrimaryKey = $columnDetails[0]->COLUMN_KEY === 'PRI';
                     }
                     break;
@@ -90,8 +92,8 @@ class CURLBuilder
 
                 case 'sqlsrv':
                     $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMNPROPERTY(object_id(?), COLUMN_NAME, 'IsIdentity') AS is_identity FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
-                    if (!empty($columnDetails) && isset($columnDetails[0]->is_identity)) {
-                        $isPrimaryKey = (bool)$columnDetails[0]->is_identity;
+                    if (! empty($columnDetails) && isset($columnDetails[0]->is_identity)) {
+                        $isPrimaryKey = (bool) $columnDetails[0]->is_identity;
                     }
                     break;
             }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -12,7 +13,7 @@ class ResourceBuilder extends BaseBuilder
     public function create(array $modelData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'resource', 'Http/Resources', 'Resource', $overwrite, function ($modelData) {
-            return ["{{ data }}" => HelperService::formatArrayToPhpSyntax($this->getResourcesData($modelData), true)];
+            return ['{{ data }}' => HelperService::formatArrayToPhpSyntax($this->getResourcesData($modelData), true)];
         });
     }
 
@@ -22,8 +23,9 @@ class ResourceBuilder extends BaseBuilder
         $columns = Schema::getColumnListing($table);
         $data = [];
         foreach ($columns as $column) {
-            $data["$column"] = '$this->' . $column;
+            $data["$column"] = '$this->'.$column;
         }
+
         return $data;
     }
 }

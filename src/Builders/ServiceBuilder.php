@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
-
 
 class ServiceBuilder extends BaseBuilder
 {
@@ -14,6 +14,7 @@ class ServiceBuilder extends BaseBuilder
             $repositoryNamespace = $repository;
             $repository = end($repositorySplitting);
             $repositoryVariable = lcfirst($repository);
+
             return [
                 '{{ modelNamespace }}' => $model,
                 '{{ model }}' => $modelData['modelName'],

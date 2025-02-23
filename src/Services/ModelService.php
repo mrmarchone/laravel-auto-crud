@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
@@ -6,6 +7,7 @@ namespace Mrmarchone\LaravelAutoCrud\Services;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
+
 use function Laravel\Prompts\multiselect;
 
 class ModelService
@@ -13,6 +15,7 @@ class ModelService
     public static function isModelExists(string $modelName, string $modelsPath): ?string
     {
         $modelsPath = static::handleModelsPath($modelsPath);
+
         return collect(File::allFiles(base_path($modelsPath)))
             ->map(function ($file) {
                 $content = file_get_contents($file->getRealPath());
@@ -25,6 +28,7 @@ class ModelService
 
                 // Extract the class name (file name without .php)
                 $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
                 // Construct the full class namespace
                 return $namespace ? $namespace . '\\' . $className : null;
             })
@@ -42,12 +46,11 @@ class ModelService
             ->first();
     }
 
-
-    public static function showModels(string $modelsPath): array|null
+    public static function showModels(string $modelsPath): ?array
     {
         $modelsPath = static::handleModelsPath($modelsPath);
         $models = collect(File::allFiles(base_path($modelsPath)))
-            ->map(function ($file) use ($modelsPath) {
+            ->map(function ($file) {
                 $content = file_get_contents($file->getRealPath());
                 $namespace = '';
 
@@ -85,6 +88,7 @@ class ModelService
     public static function resolveModelName($modelName): array
     {
         $parts = explode('\\', $modelName);
+
         return [
             'modelName' => array_pop($parts),
             'folders' => implode('/', $parts) !== 'App/Models' ? implode('/', $parts) : null,
@@ -100,7 +104,7 @@ class ModelService
             $modelName = $modelData['modelName'];
         }
 
-        $model = new $modelName();
+        $model = new $modelName;
 
         if (is_subclass_of($model, Model::class)) {
             return (new $modelName)->getTable();
@@ -112,15 +116,5 @@ class ModelService
     public static function handleModelsPath(string $modelsPath): string
     {
         return str_ends_with($modelsPath, '/') ? $modelsPath : $modelsPath . DIRECTORY_SEPARATOR;
-    }
-
-    private function getNamespaceDynamic(string $file): string|null
-    {
-        $content = file_get_contents($file);
-
-        if (preg_match('/namespace\s+([^;]+);/', $content, $matches)) {
-            return trim($matches[1]);
-        }
-        return null;
     }
 }

@@ -9,8 +9,9 @@ class SpatieDataTransformer
         $string = '';
         $indent = str_repeat(' ', 4);
         foreach ($data as $key => $value) {
-            $string .= $indent . $value . "\n" . $indent . $key . "\n";
+            $string .= $indent.$value."\n".$indent.$key."\n";
         }
+
         return $string;
     }
 
@@ -18,8 +19,9 @@ class SpatieDataTransformer
     {
         $string = '';
         foreach ($data as $value) {
-            $string .= $value . "\n";
+            $string .= $value."\n";
         }
+
         return $string;
     }
 }

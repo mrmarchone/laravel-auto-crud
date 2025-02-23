@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
-
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,13 +16,14 @@ class SpatieDataBuilder extends BaseBuilder
     public function __construct()
     {
         parent::__construct();
-        $this->enumBuilder = new EnumBuilder();
+        $this->enumBuilder = new EnumBuilder;
     }
 
     public function create(array $modelData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'spatie_data', 'Data', 'Data', $overwrite, function ($modelData) use ($overwrite) {
             $supportedData = $this->getHelperData($modelData, $overwrite);
+
             return [
                 '{{ namespaces }}' => SpatieDataTransformer::convertNamespacesToString($supportedData['namespaces']),
                 '{{ data }}' => SpatieDataTransformer::convertDataToString($supportedData['properties']),
@@ -51,11 +52,11 @@ class SpatieDataBuilder extends BaseBuilder
             switch ($driver) {
                 case 'mysql':
                 case 'pgsql':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_TYPE
+                    $columnDetails = DB::select('SELECT COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_TYPE
                                              FROM INFORMATION_SCHEMA.COLUMNS
-                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $column]);
+                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
 
-                    if (!empty($columnDetails)) {
+                    if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
                         $isPrimaryKey = ($columnInfo->COLUMN_KEY === 'PRI');
                         $isUnique = ($columnInfo->COLUMN_KEY === 'UNI');
@@ -64,7 +65,7 @@ class SpatieDataBuilder extends BaseBuilder
 
                         if (str_starts_with($columnInfo->COLUMN_TYPE, 'enum')) {
                             preg_match("/^enum\((.+)\)$/", $columnInfo->COLUMN_TYPE, $matches);
-                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", "", $matches[1])) : [];
+                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", '', $matches[1])) : [];
                         }
                     }
                     break;
@@ -85,7 +86,7 @@ class SpatieDataBuilder extends BaseBuilder
                                              FROM INFORMATION_SCHEMA.COLUMNS
                                              WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
 
-                    if (!empty($columnDetails)) {
+                    if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
                         $isPrimaryKey = ($columnInfo->is_identity);
                         $isNullable = ($columnInfo->IS_NULLABLE === 'YES');
@@ -98,7 +99,7 @@ class SpatieDataBuilder extends BaseBuilder
             }
 
             $validation = '#[{{ validation }}]';
-            $property = 'public ' . ($isNullable ? '?' : '') . '{{ type }} $' . $column . ';';
+            $property = 'public '.($isNullable ? '?' : '').'{{ type }} $'.$column.';';
 
             // Handle column types
             switch ($columnType) {
@@ -112,7 +113,7 @@ class SpatieDataBuilder extends BaseBuilder
                 case 'blob':
                     $property = str_replace('{{ type }}', 'string', $property);
                     if ($maxLength) {
-                        $rules[] = 'Max(' . $maxLength . ')';
+                        $rules[] = 'Max('.$maxLength.')';
                         $validationNamespaces[] = str_replace('{{ validationNamespace }}', 'Max', $validationNamespace);
                     }
                     break;
@@ -151,14 +152,14 @@ class SpatieDataBuilder extends BaseBuilder
                     break;
 
                 case 'enum':
-                    if (!empty($allowedValues)) {
+                    if (! empty($allowedValues)) {
                         $enum = $this->enumBuilder->create($modelData, $allowedValues, $overwrite);
                         $enumClass = explode('\\', $enum);
                         $enumClass = end($enumClass);
                         $rules[] = "Enum($enumClass::class)";
                         $property = str_replace('{{ type }}', $enumClass, $property);
                         $validationNamespaces[] = str_replace('{{ validationNamespace }}', 'Enum', $validationNamespace);
-                        $validationNamespaces[] = 'use ' . $enum . ';';
+                        $validationNamespaces[] = 'use '.$enum.';';
                     }
                     break;
 

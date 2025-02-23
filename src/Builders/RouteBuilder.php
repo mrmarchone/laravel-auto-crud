@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -18,13 +19,13 @@ class RouteBuilder
             ? "Route::apiResource('/{$modelName}', {$controller}::class);"
             : "Route::resource('/{$modelName}', {$controller}::class);";
 
-        if (!file_exists($routesPath)) {
+        if (! file_exists($routesPath)) {
             file_put_contents($routesPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n");
         }
 
         $content = file_get_contents($routesPath);
         if (strpos($content, $routeCode) === false) {
-            file_put_contents($routesPath, "\n" . $routeCode . "\n", FILE_APPEND);
+            file_put_contents($routesPath, "\n".$routeCode."\n", FILE_APPEND);
         }
     }
 }

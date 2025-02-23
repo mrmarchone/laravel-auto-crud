@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
@@ -12,13 +13,13 @@ class HelperService
 
         foreach ($data as $key => $value) {
             if ($removeValuesQuotes) {
-                $formattedArray .= $indent . "'$key' => $value,\n";
+                $formattedArray .= $indent."'$key' => $value,\n";
             } else {
-                $formattedArray .= $indent . "'$key' => '$value',\n";
+                $formattedArray .= $indent."'$key' => '$value',\n";
             }
         }
 
-        $formattedArray .= str_repeat(' ', $indentation - 4) . "]";
+        $formattedArray .= str_repeat(' ', $indentation - 4).']';
 
         return $formattedArray;
     }
@@ -51,5 +52,4 @@ ASCII;
         echo "[+] Name: Abdelrahman Muhammed\n";
         echo "[+] Email: mrmarchone@gmail.com\n";
     }
-
 }

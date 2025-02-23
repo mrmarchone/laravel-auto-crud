@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
@@ -12,6 +13,7 @@ class DatabaseValidatorService
     {
         try {
             DB::connection()->getPdo();
+
             return true;
         } catch (\PDOException $e) {
             return false;

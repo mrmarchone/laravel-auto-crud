@@ -9,8 +9,9 @@ class EnumTransformer
         $string = '';
         $indent = str_repeat(' ', 4);
         foreach ($data as $value) {
-            $string .= $indent . 'case ' . $value . ' = ' . "'$value';" . "\n";
+            $string .= $indent.'case '.$value.' = '."'$value';"."\n";
         }
+
         return $string;
     }
 }

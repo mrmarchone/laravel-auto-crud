@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -13,7 +14,7 @@ class RequestBuilder extends BaseBuilder
     public function create(array $modelData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'request', 'Http/Requests', 'Request', $overwrite, function ($modelData) {
-            return ["{{ data }}" => HelperService::formatArrayToPhpSyntax($this->getRequestData($modelData))];
+            return ['{{ data }}' => HelperService::formatArrayToPhpSyntax($this->getRequestData($modelData))];
         });
     }
 
@@ -36,11 +37,11 @@ class RequestBuilder extends BaseBuilder
             switch ($driver) {
                 case 'mysql':
                 case 'pgsql':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_TYPE
+                    $columnDetails = DB::select('SELECT COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_TYPE
                                              FROM INFORMATION_SCHEMA.COLUMNS
-                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $column]);
+                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
 
-                    if (!empty($columnDetails)) {
+                    if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
                         $isPrimaryKey = ($columnInfo->COLUMN_KEY === 'PRI');
                         $isUnique = ($columnInfo->COLUMN_KEY === 'UNI');
@@ -49,7 +50,7 @@ class RequestBuilder extends BaseBuilder
 
                         if (str_starts_with($columnInfo->COLUMN_TYPE, 'enum')) {
                             preg_match("/^enum\((.+)\)$/", $columnInfo->COLUMN_TYPE, $matches);
-                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", "", $matches[1])) : [];
+                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", '', $matches[1])) : [];
                         }
                     }
                     break;
@@ -70,7 +71,7 @@ class RequestBuilder extends BaseBuilder
                                              FROM INFORMATION_SCHEMA.COLUMNS
                                              WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
 
-                    if (!empty($columnDetails)) {
+                    if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
                         $isPrimaryKey = ($columnInfo->is_identity);
                         $isNullable = ($columnInfo->IS_NULLABLE === 'YES');
@@ -88,7 +89,7 @@ class RequestBuilder extends BaseBuilder
                 case 'varchar':
                     $rules[] = 'string';
                     if ($maxLength) {
-                        $rules[] = 'max:' . $maxLength;
+                        $rules[] = 'max:'.$maxLength;
                     }
                     break;
 
@@ -126,8 +127,8 @@ class RequestBuilder extends BaseBuilder
                     break;
 
                 case 'enum':
-                    if (!empty($allowedValues)) {
-                        $rules[] = 'in:' . implode(',', $allowedValues);
+                    if (! empty($allowedValues)) {
+                        $rules[] = 'in:'.implode(',', $allowedValues);
                     }
                     break;
 
@@ -147,7 +148,7 @@ class RequestBuilder extends BaseBuilder
 
             // Handle unique columns
             if ($isUnique) {
-                $rules[] = 'unique:' . $table . ',' . $column;
+                $rules[] = 'unique:'.$table.','.$column;
             }
 
             // Exclude primary keys and timestamps

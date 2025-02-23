@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -49,6 +50,7 @@ class ControllerBuilder extends BaseBuilder
             $resourceName = explode('\\', $resource);
             $requestName = explode('\\', $request);
             $serviceName = explode('\\', $service);
+
             return [
                 '{{ requestNamespace }}' => $request,
                 '{{ resourceNamespace }}' => $resource,
@@ -66,6 +68,7 @@ class ControllerBuilder extends BaseBuilder
         return $this->fileService->createFromStub($modelData, 'api_repository_spatie_data.controller', 'Http/Controllers/API', 'Controller', $overwrite, function ($modelData) use ($spatieData, $service) {
             $spatieDataName = explode('\\', $spatieData);
             $serviceName = explode('\\', $service);
+
             return [
                 '{{ spatieDataNamespace }}' => $spatieData,
                 '{{ spatieData }}' => end($spatieDataName),
@@ -81,6 +84,7 @@ class ControllerBuilder extends BaseBuilder
         return $this->fileService->createFromStub($modelData, 'web.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($request) {
             $model = $this->getFullModelNamespace($modelData);
             $requestName = explode('\\', $request);
+
             return [
                 '{{ requestNamespace }}' => $request,
                 '{{ modelNamespace }}' => $model,
@@ -122,6 +126,7 @@ class ControllerBuilder extends BaseBuilder
         return $this->fileService->createFromStub($modelData, 'web_spatie_data.controller', 'Http/Controllers', 'Controller', $overwrite, function ($modelData) use ($spatieData) {
             $model = $this->getFullModelNamespace($modelData);
             $spatieDataName = explode('\\', $spatieData);
+
             return [
                 '{{ spatieDataNamespace }}' => $spatieData,
                 '{{ modelNamespace }}' => $model,

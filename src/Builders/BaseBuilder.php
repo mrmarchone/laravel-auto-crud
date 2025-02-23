@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
@@ -11,11 +12,11 @@ abstract class BaseBuilder
 
     public function __construct()
     {
-        $this->fileService = new FileService();
+        $this->fileService = new FileService;
     }
 
     protected function getFullModelNamespace(array $modelData): string
     {
-        return $modelData['namespace'] ? $modelData['namespace'] . '\\' . $modelData['modelName'] : $modelData['modelName'];
+        return $modelData['namespace'] ? $modelData['namespace'].'\\'.$modelData['modelName'] : $modelData['modelName'];
     }
 }
