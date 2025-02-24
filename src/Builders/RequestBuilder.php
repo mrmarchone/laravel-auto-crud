@@ -36,21 +36,54 @@ class RequestBuilder extends BaseBuilder
 
             switch ($driver) {
                 case 'mysql':
-                case 'pgsql':
-                    $columnDetails = DB::select('SELECT COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_TYPE
-                                             FROM INFORMATION_SCHEMA.COLUMNS
-                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
+                    $columnDetails = DB::select("SHOW COLUMNS FROM `$table` WHERE Field = ?", [$column]);
 
                     if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
-                        $isPrimaryKey = ($columnInfo->COLUMN_KEY === 'PRI');
-                        $isUnique = ($columnInfo->COLUMN_KEY === 'UNI');
-                        $isNullable = ($columnInfo->IS_NULLABLE === 'YES');
-                        $maxLength = $columnInfo->CHARACTER_MAXIMUM_LENGTH;
+                        $isPrimaryKey = ($columnInfo->Key === 'PRI');
+                        $isUnique = ($columnInfo->Key === 'UNI');
+                        $isNullable = ($columnInfo->Null === 'YES');
+                        $maxLength = isset($columnInfo->Type) && preg_match('/\((\d+)\)/', $columnInfo->Type, $matches) ? $matches[1] : null;
 
-                        if (str_starts_with($columnInfo->COLUMN_TYPE, 'enum')) {
-                            preg_match("/^enum\((.+)\)$/", $columnInfo->COLUMN_TYPE, $matches);
-                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", '', $matches[1])) : [];
+                        if (str_starts_with($columnInfo->Type, 'enum')) {
+                            preg_match("/^enum\((.+)\)$/", $columnInfo->Type, $matches);
+                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", "", $matches[1])) : [];
+                        }
+                    }
+                    break;
+
+                case 'pgsql':
+                    $columnDetails = DB::select("
+                                    SELECT
+                                        column_name,
+                                        column_default,
+                                        is_nullable,
+                                        data_type,
+                                        character_maximum_length,
+                                        udt_name,
+                                        (SELECT COUNT(*) > 0 FROM information_schema.table_constraints tc
+                                            JOIN information_schema.constraint_column_usage ccu
+                                            ON tc.constraint_name = ccu.constraint_name
+                                            WHERE tc.table_name = ? AND ccu.column_name = ? AND tc.constraint_type = 'PRIMARY KEY') AS is_primary,
+                                        (SELECT COUNT(*) > 0 FROM information_schema.table_constraints tc
+                                            JOIN information_schema.constraint_column_usage ccu
+                                            ON tc.constraint_name = ccu.constraint_name
+                                            WHERE tc.table_name = ? AND ccu.column_name = ? AND tc.constraint_type = 'UNIQUE') AS is_unique
+                                    FROM information_schema.columns
+                                    WHERE table_name = ? AND column_name = ?",
+                        [$table, $column, $table, $column, $table, $column]
+                    );
+
+                    if (!empty($columnDetails)) {
+                        $columnInfo = $columnDetails[0];
+                        $isPrimaryKey = $columnInfo->is_primary;
+                        $isUnique = $columnInfo->is_unique;
+                        $isNullable = ($columnInfo->is_nullable === 'YES');
+                        $maxLength = $columnInfo->character_maximum_length ?? null;
+
+                        if (str_starts_with($columnInfo->udt_name, '_')) {
+                            preg_match("/^_(.+)$/", $columnInfo->udt_name, $matches);
+                            $allowedValues = isset($matches[1]) ? str_getcsv(str_replace("'", "", $matches[1])) : [];
                         }
                     }
                     break;
@@ -67,9 +100,10 @@ class RequestBuilder extends BaseBuilder
                     break;
 
                 case 'sqlsrv':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMNPROPERTY(object_id(?), COLUMN_NAME, 'IsIdentity') AS is_identity, IS_NULLABLE, DATA_TYPE
-                                             FROM INFORMATION_SCHEMA.COLUMNS
-                                             WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
+                    $columnDetails = DB::select("
+                        SELECT COLUMN_NAME, COLUMNPROPERTY(object_id(?), COLUMN_NAME, 'IsIdentity') AS is_identity, IS_NULLABLE, DATA_TYPE
+                        FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
 
                     if (! empty($columnDetails)) {
                         $columnInfo = $columnDetails[0];
@@ -78,6 +112,7 @@ class RequestBuilder extends BaseBuilder
                     }
                     break;
             }
+
 
             // Handle nullable columns
             $rules[] = $isNullable ? 'nullable' : 'required';

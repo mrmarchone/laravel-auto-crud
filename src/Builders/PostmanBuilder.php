@@ -119,10 +119,29 @@ class PostmanBuilder
 
             switch ($driver) {
                 case 'mysql':
-                case 'pgsql':
-                    $columnDetails = DB::select('SELECT COLUMN_NAME, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
-                    if (! empty($columnDetails) && isset($columnDetails[0]->COLUMN_KEY)) {
+                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $column]);
+                    if (!empty($columnDetails) && isset($columnDetails[0]->COLUMN_KEY)) {
                         $isPrimaryKey = $columnDetails[0]->COLUMN_KEY === 'PRI';
+                    }
+                    break;
+
+                case 'pgsql':
+                    $columnDetails = DB::select("
+        SELECT
+            c.column_name,
+            (SELECT COUNT(*) > 0
+             FROM information_schema.table_constraints tc
+             JOIN information_schema.constraint_column_usage ccu
+             ON tc.constraint_name = ccu.constraint_name
+             WHERE tc.table_name = ? AND ccu.column_name = ? AND tc.constraint_type = 'PRIMARY KEY'
+            ) AS is_primary
+        FROM information_schema.columns c
+        WHERE c.table_name = ? AND c.column_name = ?",
+                        [$table, $column, $table, $column]
+                    );
+
+                    if (!empty($columnDetails) && isset($columnDetails[0]->is_primary)) {
+                        $isPrimaryKey = $columnDetails[0]->is_primary;
                     }
                     break;
 
