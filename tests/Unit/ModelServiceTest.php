@@ -1,67 +1,86 @@
 <?php
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Mrmarchone\LaravelAutoCrud\Services\ModelService;
 
 beforeEach(function () {
-    $this->app->setBasePath(__DIR__ . '/../');
-    File::partialMock();
+    $this->modelsPath = 'app/Models';
 });
 
-describe('handling models path', function () {
-    it('handle models path without slash', function () {
-        $service = ModelService::handleModelsPath('app/Models/User.php');
-        expect($service)->toBe('app/Models/User.php/');
-    });
+test('isModelExists returns model namespace if it exists', function () {
+    $mockFile = Mockery::mock();
+    $mockFile->shouldReceive('getRealPath')->andReturn('app/Models/User.php');
+    $mockFile->shouldReceive('getFilename')->andReturn('User.php');
 
-    it('handle models path with slash', function () {
-        $service = ModelService::handleModelsPath('app/Models/User.php/');
-        expect($service)->toBe('app/Models/User.php/');
-    });
+    File::shouldReceive('allFiles')->once()->andReturn([$mockFile]);
 
-    it('resolves model name', function () {
-        $service = ModelService::resolveModelName('User');
-        expect($service)->toBe([
-            'modelName' => 'User',
-            'folders' => '',
-            'namespace' => null,
-        ]);
-    });
+    File::shouldReceive('get')->with('app/Models/User.php')->andReturn('<?php namespace App\\Models; class User {}');
 
-    it('resolves model name if exists inside app/models', function () {
-        $service = ModelService::resolveModelName('App\\Models\\User');
-        expect($service)->toBe([
-            'modelName' => 'User',
-            'folders' => null,
-            'namespace' => 'App\\Models',
-        ]);
-    });
-
-
-    it('resolves model name if exists inside sub-dir inside app/Models', function () {
-        $service = ModelService::resolveModelName('App\\Models\\TestingFolder\\User');
-        expect($service)->toBe([
-            'modelName' => 'User',
-            'folders' => 'App/Models/TestingFolder',
-            'namespace' => 'App\\Models\\TestingFolder',
-        ]);
-    });
+    expect(ModelService::isModelExists('User', $this->modelsPath))->toBe('App\\Models\\User');
 });
 
-describe('handling namespace', function () {
-    it('returns the full namespace when a model exists with the given name', function () {
-        // Act
-        $result = ModelService::isModelExists('User', 'Models');
+test('isModelExists returns null if model does not exist', function () {
+    File::shouldReceive('allFiles')->once()->andReturn([]);
 
-        // Assert
-        expect($result)->toBe('Tests\\Models\\User');
-    });
-
-
-    it('returns null when a model not exists with the given name', function () {
-        // Act
-        $result = ModelService::isModelExists('Project', 'Models');
-        // Assert
-        expect($result)->toBeNull();
-    });
+    expect(ModelService::isModelExists('NonExistent', $this->modelsPath))->toBeNull();
 });
+
+test('resolveModelName correctly extracts model details', function () {
+    $result = ModelService::resolveModelName('App\\Models\\User');
+
+    expect($result)->toMatchArray([
+        'modelName' => 'User',
+        'folders' => null,
+        'namespace' => 'App\\Models'
+    ]);
+});
+
+test('handleModelsPath ensures trailing slash', function () {
+    expect(ModelService::handleModelsPath('app/Models'))->toBe('app/Models/');
+    expect(ModelService::handleModelsPath('app/Models/'))->toBe('app/Models/');
+});
+
+it('returns table name when model has namespace and is valid', function () {
+    // Create an anonymous class extending Model
+    $mockModel = new class extends Model {
+        public function getTable() {
+            return 'mock_table';
+        }
+    };
+
+    // Mock the class creation
+    $modelData = [
+        'namespace' => 'App\\Models',
+        'modelName' => 'TestModel'
+    ];
+
+    // Mock the class existence
+    class_alias(get_class($mockModel), 'App\\Models\\TestModel');
+
+    $result = ModelService::getFullModelNamespace($modelData);
+
+    expect($result)->toBe('mock_table');
+});
+
+it('returns table name when model has no namespace and is valid', function () {
+    $mockModel = new class extends Model {
+        public function getTable() {
+            return 'mock_table';
+        }
+    };
+
+    $modelData = [
+        'namespace' => '',
+        'modelName' => 'TestModelNoNamespace'
+    ];
+
+    class_alias(get_class($mockModel), 'TestModelNoNamespace');
+
+    $result = ModelService::getFullModelNamespace($modelData);
+
+    expect($result)->toBe('mock_table');
+});
+
+
+

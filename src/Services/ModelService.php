@@ -14,24 +14,7 @@ class ModelService
 {
     public static function isModelExists(string $modelName, string $modelsPath): ?string
     {
-        $modelsPath = static::handleModelsPath($modelsPath);
-
-        return collect(File::allFiles(base_path($modelsPath)))
-            ->map(function ($file) {
-                $content = file_get_contents($file->getRealPath());
-                $namespace = '';
-
-                // Extract the namespace from the file
-                if (preg_match('/namespace\s+([^;]+);/', $content, $matches)) {
-                    $namespace = trim($matches[1]);
-                }
-
-                // Extract the class name (file name without .php)
-                $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-
-                // Construct the full class namespace
-                return $namespace ? $namespace . '\\' . $className : null;
-            })
+        return self::getAllModels($modelsPath)
             ->filter(function ($fullNamespace) use ($modelName) {
                 if (!$fullNamespace) {
                     return false;
@@ -48,23 +31,7 @@ class ModelService
 
     public static function showModels(string $modelsPath): ?array
     {
-        $modelsPath = static::handleModelsPath($modelsPath);
-        $models = collect(File::allFiles(base_path($modelsPath)))
-            ->map(function ($file) {
-                $content = file_get_contents($file->getRealPath());
-                $namespace = '';
-
-                // Extract namespace
-                if (preg_match('/namespace\s+([^;]+);/', $content, $matches)) {
-                    $namespace = trim($matches[1]);
-                }
-
-                // Extract class name from file name
-                $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-
-                // Construct full namespace
-                return $namespace ? $namespace . '\\' . $className : null;
-            })
+        $models = self::getAllModels($modelsPath)
             ->filter(function ($fullNamespace) {
                 if (!$fullNamespace) {
                     return false;
@@ -96,25 +63,50 @@ class ModelService
         ];
     }
 
-    public static function getFullModelNamespace($modelData): string
+    public static function getFullModelNamespace(array $modelData, callable $modelFactory = null): string
     {
-        if ($modelData['namespace']) {
+        if (isset($modelData['namespace']) && $modelData['namespace']) {
             $modelName = $modelData['namespace'] . '\\' . $modelData['modelName'];
         } else {
             $modelName = $modelData['modelName'];
         }
 
-        $model = new $modelName;
+        // استخدم الـ Factory إذا تم تمريره، وإلا أنشئ الكائن بالطريقة العادية
+        $model = $modelFactory ? $modelFactory($modelName) : new $modelName;
 
         if (is_subclass_of($model, Model::class)) {
-            return (new $modelName)->getTable();
+            return $model->getTable();
         }
 
-        throw new InvalidArgumentException('Model ' . $modelName . ' does not exist');
+        throw new InvalidArgumentException("Model {$modelName} does not exist");
     }
 
     public static function handleModelsPath(string $modelsPath): string
     {
         return str_ends_with($modelsPath, '/') ? $modelsPath : $modelsPath . DIRECTORY_SEPARATOR;
+    }
+
+    private static function getAllModels(string $modelsPath): \Illuminate\Support\Collection
+    {
+        $modelsPath = static::handleModelsPath($modelsPath);
+        return collect(File::allFiles(static::getModelNameFromPath($modelsPath)))->map(function ($file) {
+            $content = static::getClassContent($file->getRealPath());
+            $namespace = '';
+            if (preg_match('/namespace\s+([^;]+);/', $content, $matches)) {
+                $namespace = trim($matches[1]);
+            }
+            $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+            return $namespace ? $namespace . '\\' . $className : null;
+        });
+    }
+
+    private static function getModelNameFromPath(string $modelsPath): string
+    {
+        return base_path($modelsPath);
+    }
+
+    private static function getClassContent($file): false|string
+    {
+        return File::get($file);
     }
 }

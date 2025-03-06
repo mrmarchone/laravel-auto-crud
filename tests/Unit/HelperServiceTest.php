@@ -37,6 +37,15 @@ it('format array to php syntax', function () {
 });
 
 
+it('format array to php syntax with remove value quotes', function () {
+    $expected = HelperService::formatArrayToPhpSyntax(['testing' => 'me'], true);
+    $indent = 12;
+    $indentation = str_repeat(' ', $indent);
+    $anotherIndent = str_repeat(' ', $indent - 4);
+    expect($expected)->toBe("[\n{$indentation}'testing' => me,\n{$anotherIndent}]");
+});
+
+
 it('convert to snake case', function () {
     $expected = HelperService::toSnakeCase('hello world');
     expect($expected)->toBe('hello_world');

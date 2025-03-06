@@ -4,12 +4,22 @@ declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
 
-use Illuminate\Support\Facades\Schema;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;
 use Mrmarchone\LaravelAutoCrud\Services\ModelService;
+use Mrmarchone\LaravelAutoCrud\Services\TableColumnsService;
+use Mrmarchone\LaravelAutoCrud\Traits\TableColumnsTrait;
 
 class ResourceBuilder extends BaseBuilder
 {
+    use TableColumnsTrait;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->modelService = new ModelService;
+        $this->tableColumnsService = new TableColumnsService;
+    }
+
     public function create(array $modelData, bool $overwrite = false): string
     {
         return $this->fileService->createFromStub($modelData, 'resource', 'Http/Resources', 'Resource', $overwrite, function ($modelData) {
@@ -19,11 +29,13 @@ class ResourceBuilder extends BaseBuilder
 
     private function getResourcesData(array $modelData): array
     {
-        $table = ModelService::getFullModelNamespace($modelData);
-        $columns = Schema::getColumnListing($table);
+        $columns = $this->getAvailableColumns($modelData);
+
         $data = [];
+
         foreach ($columns as $column) {
-            $data["$column"] = '$this->'.$column;
+            $columnName = $column['name'];
+            $data[$columnName] = '$this->'.$columnName;
         }
 
         return $data;

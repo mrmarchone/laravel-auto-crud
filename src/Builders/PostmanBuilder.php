@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Builders;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;
 use Mrmarchone\LaravelAutoCrud\Services\ModelService;
+use Mrmarchone\LaravelAutoCrud\Services\TableColumnsService;
+use Mrmarchone\LaravelAutoCrud\Traits\TableColumnsTrait;
 
 class PostmanBuilder
 {
+    use TableColumnsTrait;
+
+    public function __construct()
+    {
+        $this->modelService = new ModelService;
+        $this->tableColumnsService = new TableColumnsService;
+    }
+
     public function create(array $modelData)
     {
         $laravelAutoCrudPath = base_path('laravel-auto-crud');
@@ -107,71 +115,11 @@ class PostmanBuilder
 
     private function getColumnsData(array $modelData): array
     {
-        $table = ModelService::getFullModelNamespace($modelData);
-        $columns = Schema::getColumnListing($table);
-        $data = [];
+        $columns = $this->getAvailableColumns($modelData);
 
-        // Get database driver
-        $driver = DB::connection()->getDriverName();
-
-        foreach ($columns as $column) {
-            $isPrimaryKey = false;
-
-            switch ($driver) {
-                case 'mysql':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $column]);
-                    if (!empty($columnDetails) && isset($columnDetails[0]->COLUMN_KEY)) {
-                        $isPrimaryKey = $columnDetails[0]->COLUMN_KEY === 'PRI';
-                    }
-                    break;
-
-                case 'pgsql':
-                    $columnDetails = DB::select("
-        SELECT
-            c.column_name,
-            (SELECT COUNT(*) > 0
-             FROM information_schema.table_constraints tc
-             JOIN information_schema.constraint_column_usage ccu
-             ON tc.constraint_name = ccu.constraint_name
-             WHERE tc.table_name = ? AND ccu.column_name = ? AND tc.constraint_type = 'PRIMARY KEY'
-            ) AS is_primary
-        FROM information_schema.columns c
-        WHERE c.table_name = ? AND c.column_name = ?",
-                        [$table, $column, $table, $column]
-                    );
-
-                    if (!empty($columnDetails) && isset($columnDetails[0]->is_primary)) {
-                        $isPrimaryKey = $columnDetails[0]->is_primary;
-                    }
-                    break;
-
-                case 'sqlite':
-                    $columnDetails = DB::select("PRAGMA table_info($table)");
-                    foreach ($columnDetails as $col) {
-                        if ($col->name === $column && $col->pk == 1) {
-                            $isPrimaryKey = true;
-                            break;
-                        }
-                    }
-                    break;
-
-                case 'sqlsrv':
-                    $columnDetails = DB::select("SELECT COLUMN_NAME, COLUMNPROPERTY(object_id(?), COLUMN_NAME, 'IsIdentity') AS is_identity FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?", [$table, $table, $column]);
-                    if (! empty($columnDetails) && isset($columnDetails[0]->is_identity)) {
-                        $isPrimaryKey = (bool) $columnDetails[0]->is_identity;
-                    }
-                    break;
-            }
-
-            // Exclude primary keys and timestamp fields
-            if ($isPrimaryKey || in_array($column, ['created_at', 'updated_at'])) {
-                continue;
-            }
-
-            $data[$column] = 'value';
-        }
-
-        return $data;
+        return array_map(function ($column) {
+            return 'value';
+        }, $columns);
     }
 
     private function buildPostmanObject(array $data): array

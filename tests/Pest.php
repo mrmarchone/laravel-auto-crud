@@ -15,7 +15,7 @@ pest()->extend(Tests\TestCase::class)->in(__DIR__);
 
 use Tests\TestCase;
 
-//uses(TestCase::class)->in(__DIR__);
+// uses(TestCase::class)->in(__DIR__);
 /*
 |--------------------------------------------------------------------------
 | Expectations
@@ -27,9 +27,9 @@ use Tests\TestCase;
 |
 */
 
-//expect()->extend('toBeOne', function () {
+// expect()->extend('toBeOne', function () {
 //    return $this->toBe(1);
-//});
+// });
 
 /*
 |--------------------------------------------------------------------------
