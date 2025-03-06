@@ -10,6 +10,8 @@ use Mrmarchone\LaravelAutoCrud\Services\ModelService;
 use Mrmarchone\LaravelAutoCrud\Services\TableColumnsService;
 use Mrmarchone\LaravelAutoCrud\Traits\TableColumnsTrait;
 
+use function Laravel\Prompts\info;
+
 class CURLBuilder
 {
     use TableColumnsTrait;
@@ -20,10 +22,10 @@ class CURLBuilder
         $this->tableColumnsService = new TableColumnsService;
     }
 
-    public function create(array $modelData): void
+    public function create(array $modelData, bool $overwrite = false): void
     {
         $laravelAutoCrudPath = base_path('laravel-auto-crud');
-        if (!file_exists($laravelAutoCrudPath)) {
+        if (! file_exists($laravelAutoCrudPath)) {
             mkdir($laravelAutoCrudPath, 0755, true);
         }
 
@@ -38,14 +40,17 @@ class CURLBuilder
             ['GET', ''],
             ['GET', '/:id'],
         ];
-        file_put_contents($laravelAutoCrudPath . '/curl.txt', "====================={$modelData['modelName']}=====================" . "\n", FILE_APPEND);
+        $overwrite = $overwrite ? 0 : FILE_APPEND;
+        file_put_contents($laravelAutoCrudPath.'/curl.txt', "====================={$modelData['modelName']}====================="."\n", $overwrite);
         foreach ($endpoints as $endpoint) {
             [$method, $path] = $endpoint;
             $data = $endpoint[2] ?? [];
-            $curlCommand = $this->generateCurlCommand($method, $routeBase . $path, $data);
-            file_put_contents($laravelAutoCrudPath . '/curl.txt', $curlCommand . "\n\n", FILE_APPEND);
+            $curlCommand = $this->generateCurlCommand($method, $routeBase.$path, $data);
+            file_put_contents($laravelAutoCrudPath.'/curl.txt', $curlCommand."\n\n", $overwrite);
         }
-        file_put_contents($laravelAutoCrudPath . '/curl.txt', "====================={$modelData['modelName']}=====================" . "\n", FILE_APPEND);
+        file_put_contents($laravelAutoCrudPath.'/curl.txt', "====================={$modelData['modelName']}====================="."\n", $overwrite);
+
+        info("Updated: $laravelAutoCrudPath/curl.txt");
     }
 
     private function generateCurlCommand(string $method, string $url, array $data = []): string
@@ -59,7 +64,7 @@ class CURLBuilder
         if (in_array($method, ['POST', 'PATCH'])) {
             $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             $curlCommand .= "--request {$method} \\\n";
-            $curlCommand .= "--data '" . $jsonData . "'";
+            $curlCommand .= "--data '".$jsonData."'";
         } else {
             $curlCommand .= "--request {$method}";
         }

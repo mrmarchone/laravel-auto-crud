@@ -68,7 +68,7 @@ class CRUDGenerator
         $controllerName = $this->generateController($checkForType, $modelData, $data, $options);
         $this->routeBuilder->create($modelData['modelName'], $controllerName, $checkForType);
 
-        info('Auto CRUD files generated successfully for '.$modelData['modelName']);
+        info('Auto CRUD files generated successfully for '.$modelData['modelName'].' Model');
     }
 
     private function askControllerType(?string $type = null): string
@@ -115,11 +115,11 @@ class CRUDGenerator
         }
 
         if ($options['postman']) {
-            $this->postmanBuilder->create($modelData);
+            $this->postmanBuilder->create($modelData, $options['overwrite']);
         }
 
         if ($options['curl']) {
-            $this->CURLBuilder->create($modelData);
+            $this->CURLBuilder->create($modelData, $options['overwrite']);
         }
 
         return $controllerName;

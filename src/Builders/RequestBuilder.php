@@ -16,8 +16,8 @@ class RequestBuilder extends BaseBuilder
     public function __construct()
     {
         parent::__construct();
-        $this->tableColumnsService = new TableColumnsService();
-        $this->modelService = new ModelService();
+        $this->tableColumnsService = new TableColumnsService;
+        $this->modelService = new ModelService;
     }
 
     public function create(array $modelData, bool $overwrite = false): string

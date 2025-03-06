@@ -5,7 +5,7 @@ namespace Mrmarchone\LaravelAutoCrud\Services;
 use Illuminate\Support\Facades\File;
 
 use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\spin;
+use function Laravel\Prompts\info;
 
 class FileService
 {
@@ -31,20 +31,16 @@ class FileService
             }
         }
 
-        return spin(
-            callback: function () use ($modelData, $stubPath, $filePath, $namespace, $suffix, $dataCallback) {
-                File::ensureDirectoryExists(dirname($filePath), 0777, true);
+        File::ensureDirectoryExists(dirname($filePath), 0777, true);
 
-                $data = $dataCallback ? $dataCallback($modelData) : [];
-                $content = $this->generateContent($stubPath, $modelData, $namespace, $suffix, $data);
+        $data = $dataCallback ? $dataCallback($modelData) : [];
+        $content = $this->generateContent($stubPath, $modelData, $namespace, $suffix, $data);
 
-                File::put($filePath, $content);
-                info("Created: $filePath");
+        File::put($filePath, $content);
 
-                return $namespace.'\\'.$modelData['modelName'].$suffix;
-            },
-            message: 'Creating '.ucfirst($stubType).'..',
-        );
+        info("Created: $filePath");
+
+        return $namespace.'\\'.$modelData['modelName'].$suffix;
     }
 
     private function generateFilePath(array $modelData, string $basePath, string $suffix): string

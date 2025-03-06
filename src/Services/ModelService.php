@@ -16,7 +16,7 @@ class ModelService
     {
         return self::getAllModels($modelsPath)
             ->filter(function ($fullNamespace) use ($modelName) {
-                if (!$fullNamespace) {
+                if (! $fullNamespace) {
                     return false;
                 }
 
@@ -33,12 +33,12 @@ class ModelService
     {
         $models = self::getAllModels($modelsPath)
             ->filter(function ($fullNamespace) {
-                if (!$fullNamespace) {
+                if (! $fullNamespace) {
                     return false;
                 }
 
                 // Ensure the class exists and is an instance of Model
-                if (!class_exists($fullNamespace)) {
+                if (! class_exists($fullNamespace)) {
                     return false;
                 }
 
@@ -63,10 +63,10 @@ class ModelService
         ];
     }
 
-    public static function getFullModelNamespace(array $modelData, callable $modelFactory = null): string
+    public static function getFullModelNamespace(array $modelData, ?callable $modelFactory = null): string
     {
         if (isset($modelData['namespace']) && $modelData['namespace']) {
-            $modelName = $modelData['namespace'] . '\\' . $modelData['modelName'];
+            $modelName = $modelData['namespace'].'\\'.$modelData['modelName'];
         } else {
             $modelName = $modelData['modelName'];
         }
@@ -83,12 +83,13 @@ class ModelService
 
     public static function handleModelsPath(string $modelsPath): string
     {
-        return str_ends_with($modelsPath, '/') ? $modelsPath : $modelsPath . DIRECTORY_SEPARATOR;
+        return str_ends_with($modelsPath, '/') ? $modelsPath : $modelsPath.DIRECTORY_SEPARATOR;
     }
 
     private static function getAllModels(string $modelsPath): \Illuminate\Support\Collection
     {
         $modelsPath = static::handleModelsPath($modelsPath);
+
         return collect(File::allFiles(static::getModelNameFromPath($modelsPath)))->map(function ($file) {
             $content = static::getClassContent($file->getRealPath());
             $namespace = '';
@@ -96,7 +97,8 @@ class ModelService
                 $namespace = trim($matches[1]);
             }
             $className = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-            return $namespace ? $namespace . '\\' . $className : null;
+
+            return $namespace ? $namespace.'\\'.$className : null;
         });
     }
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\File;
 use Mrmarchone\LaravelAutoCrud\Services\FileService;
 
 beforeEach(function () {
-    $this->app->setBasePath(__DIR__ . '/../');
+    $this->app->setBasePath(__DIR__.'/../');
     File::partialMock();
 });
 

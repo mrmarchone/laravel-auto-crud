@@ -72,7 +72,7 @@ class GenerateAutoCrudCommand extends Command
     {
         foreach ($models as $model) {
             $modelData = ModelService::resolveModelName($model);
-            $table = ModelService::getFullModelNamespace($modelData, fn($modelName) => new $modelName);
+            $table = ModelService::getFullModelNamespace($modelData, fn ($modelName) => new $modelName);
             if (! $this->databaseValidatorService->checkTableExists($table)) {
                 $createFiles = confirm(
                     label: 'Table '.$table.' not found, Do you want to create empty auto CRUD files?.'

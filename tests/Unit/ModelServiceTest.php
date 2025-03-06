@@ -32,7 +32,7 @@ test('resolveModelName correctly extracts model details', function () {
     expect($result)->toMatchArray([
         'modelName' => 'User',
         'folders' => null,
-        'namespace' => 'App\\Models'
+        'namespace' => 'App\\Models',
     ]);
 });
 
@@ -43,8 +43,10 @@ test('handleModelsPath ensures trailing slash', function () {
 
 it('returns table name when model has namespace and is valid', function () {
     // Create an anonymous class extending Model
-    $mockModel = new class extends Model {
-        public function getTable() {
+    $mockModel = new class extends Model
+    {
+        public function getTable()
+        {
             return 'mock_table';
         }
     };
@@ -52,7 +54,7 @@ it('returns table name when model has namespace and is valid', function () {
     // Mock the class creation
     $modelData = [
         'namespace' => 'App\\Models',
-        'modelName' => 'TestModel'
+        'modelName' => 'TestModel',
     ];
 
     // Mock the class existence
@@ -64,15 +66,17 @@ it('returns table name when model has namespace and is valid', function () {
 });
 
 it('returns table name when model has no namespace and is valid', function () {
-    $mockModel = new class extends Model {
-        public function getTable() {
+    $mockModel = new class extends Model
+    {
+        public function getTable()
+        {
             return 'mock_table';
         }
     };
 
     $modelData = [
         'namespace' => '',
-        'modelName' => 'TestModelNoNamespace'
+        'modelName' => 'TestModelNoNamespace',
     ];
 
     class_alias(get_class($mockModel), 'TestModelNoNamespace');
@@ -81,6 +85,3 @@ it('returns table name when model has no namespace and is valid', function () {
 
     expect($result)->toBe('mock_table');
 });
-
-
-

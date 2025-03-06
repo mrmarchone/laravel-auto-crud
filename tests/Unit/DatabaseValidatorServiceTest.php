@@ -1,11 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use Mrmarchone\LaravelAutoCrud\Services\DatabaseValidatorService;
 use Illuminate\Support\Facades\Schema;
+use Mrmarchone\LaravelAutoCrud\Services\DatabaseValidatorService;
 
 beforeEach(function () {
-    $this->service = new DatabaseValidatorService();
+    $this->service = new DatabaseValidatorService;
 });
 
 test('checkDataBaseConnection returns true when connection is successful', function () {
@@ -15,7 +15,7 @@ test('checkDataBaseConnection returns true when connection is successful', funct
 });
 
 test('checkDataBaseConnection returns false when connection fails', function () {
-    DB::shouldReceive('connection->getPdo')->once()->andThrow(new \PDOException());
+    DB::shouldReceive('connection->getPdo')->once()->andThrow(new \PDOException);
 
     expect($this->service->checkDataBaseConnection())->toBeFalse();
 });
