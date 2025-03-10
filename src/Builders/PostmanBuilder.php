@@ -48,7 +48,7 @@ class PostmanBuilder
         $model = HelperService::toSnakeCase(Str::plural($modelData['modelName']));
 
         $routeBase = sprintf(
-            'http://127.0.0.1:8000/api/%s',
+            config('app.url').'/api/%s',
             $model
         );
 

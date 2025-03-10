@@ -14,6 +14,7 @@ use Mrmarchone\LaravelAutoCrud\Builders\ResourceBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RouteBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ServiceBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\SpatieDataBuilder;
+use Mrmarchone\LaravelAutoCrud\Builders\SwaggerAPIBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ViewBuilder;
 
 use function Laravel\Prompts\info;
@@ -30,7 +31,8 @@ class CRUDGenerator
         private RepositoryBuilder $repositoryBuilder,
         private ServiceBuilder $serviceBuilder,
         private SpatieDataBuilder $spatieDataBuilder,
-        private PostmanBuilder $postmanBuilder)
+        private PostmanBuilder $postmanBuilder,
+        private SwaggerAPIBuilder $swaggerAPIBuilder)
     {
         $this->CURLBuilder = new CURLBuilder;
         $this->postmanBuilder = new PostmanBuilder;
@@ -42,6 +44,7 @@ class CRUDGenerator
         $this->repositoryBuilder = new RepositoryBuilder;
         $this->serviceBuilder = new ServiceBuilder;
         $this->spatieDataBuilder = new SpatieDataBuilder;
+        $this->swaggerAPIBuilder = new SwaggerAPIBuilder;
     }
 
     public function generate($modelData, array $options): void
@@ -59,12 +62,14 @@ class CRUDGenerator
             $repository = $this->repositoryBuilder->create($modelData, $options['overwrite']);
             $service = $this->serviceBuilder->create($modelData, $repository, $options['overwrite']);
         }
+
         $data = [
             'requestName' => $requestName ?? '',
             'repository' => $repository ?? '',
             'service' => $service ?? '',
             'spatieData' => $spatieDataName ?? '',
         ];
+
         $controllerName = $this->generateController($checkForType, $modelData, $data, $options);
         $this->routeBuilder->create($modelData['modelName'], $controllerName, $checkForType);
 
@@ -120,6 +125,10 @@ class CRUDGenerator
 
         if ($options['curl']) {
             $this->CURLBuilder->create($modelData, $options['overwrite']);
+        }
+
+        if ($options['swagger-api']) {
+            $this->swaggerAPIBuilder->create($modelData, $options['overwrite']);
         }
 
         return $controllerName;

@@ -16,14 +16,17 @@ use function Laravel\Prompts\confirm;
 class GenerateAutoCrudCommand extends Command
 {
     protected $signature = 'auto-crud:generate
+    {--A|all : Force generate all possible files without overwrite option.}
+    {--FA|force-all : Force generate all possible files with overwrite option.}
     {--MP|model-path= : Set models path.}
     {--M|model=* : Select one or more of your models.}
     {--T|type= : Select weather api or web.}
-    {--R|repository : Working with repository design pattern}
+    {--R|repository : Working with repository design pattern.}
     {--O|overwrite : Overwrite the files if already exists.}
     {--P|pattern= : Supports Spatie-Data Pattern.}
     {--C|curl : Generate CURL Requests for API.}
-    {--PM|postman : Generate Postman Collection for API.}';
+    {--PM|postman : Generate Postman Collection for API.}
+    {--S|swagger-api : Generate Swagger API json for API.}';
 
     protected $description = 'A command to create auto CRUD for your models.';
 

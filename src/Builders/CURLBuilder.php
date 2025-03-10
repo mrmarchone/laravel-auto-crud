@@ -30,7 +30,7 @@ class CURLBuilder
         }
 
         $routeBase = sprintf(
-            'http://127.0.0.1:8000/api/%s',
+            config('app.url').'/api/%s',
             HelperService::toSnakeCase(Str::plural($modelData['modelName']))
         );
         $endpoints = [
