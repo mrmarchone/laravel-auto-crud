@@ -6,36 +6,27 @@ namespace Mrmarchone\LaravelAutoCrud\Services;
 
 use InvalidArgumentException;
 use Mrmarchone\LaravelAutoCrud\Builders\ControllerBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\CURLBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\PostmanBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RepositoryBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RequestBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ResourceBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\RouteBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ServiceBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\SpatieDataBuilder;
-use Mrmarchone\LaravelAutoCrud\Builders\SwaggerAPIBuilder;
 use Mrmarchone\LaravelAutoCrud\Builders\ViewBuilder;
 
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\text;
 
 class CRUDGenerator
 {
-    public function __construct(private CURLBuilder $CURLBuilder,
-        private ControllerBuilder $controllerBuilder,
+    public function __construct(private ControllerBuilder $controllerBuilder,
         private ResourceBuilder $resourceBuilder,
         private RequestBuilder $requestBuilder,
         private RouteBuilder $routeBuilder,
         private ViewBuilder $viewBuilder,
         private RepositoryBuilder $repositoryBuilder,
         private ServiceBuilder $serviceBuilder,
-        private SpatieDataBuilder $spatieDataBuilder,
-        private PostmanBuilder $postmanBuilder,
-        private SwaggerAPIBuilder $swaggerAPIBuilder)
+        private SpatieDataBuilder $spatieDataBuilder)
     {
-        $this->CURLBuilder = new CURLBuilder;
-        $this->postmanBuilder = new PostmanBuilder;
         $this->controllerBuilder = new ControllerBuilder;
         $this->resourceBuilder = new ResourceBuilder;
         $this->requestBuilder = new RequestBuilder;
@@ -44,12 +35,11 @@ class CRUDGenerator
         $this->repositoryBuilder = new RepositoryBuilder;
         $this->serviceBuilder = new ServiceBuilder;
         $this->spatieDataBuilder = new SpatieDataBuilder;
-        $this->swaggerAPIBuilder = new SwaggerAPIBuilder;
     }
 
     public function generate($modelData, array $options): void
     {
-        $checkForType = $this->askControllerType($options['type']);
+        $checkForType = $options['type'];
 
         if ($options['pattern'] == 'spatie-data') {
             $spatieDataName = $this->spatieDataBuilder->create($modelData, $options['overwrite']);
@@ -76,59 +66,42 @@ class CRUDGenerator
         info('Auto CRUD files generated successfully for '.$modelData['modelName'].' Model');
     }
 
-    private function askControllerType(?string $type = null): string
+    private function generateController(array $types, array $modelData, array $data, array $options): string
     {
-        return $type ?? text(
-            label: 'Do you want to create an api or web controller?',
-            default: 'api',
-            required: true,
-            validate: function ($value) {
-                if (! in_array(strtolower($value), ['api', 'web'])) {
-                    return 'Please enter a valid type api or web';
-                }
+        $controllerName = null;
 
-                return null;
-            },
-            hint: 'Write api or web',
-        );
-    }
-
-    private function generateController(string $type, array $modelData, array $data, array $options): string
-    {
-        if ($type === 'api') {
-            return $this->generateAPIController($modelData, $data['requestName'], $data['repository'], $data['service'], $options, $data['spatieData']);
+        if (in_array('api', $types)) {
+            $controllerName = $this->generateAPIController($modelData, $data['requestName'], $data['repository'], $data['service'], $options, $data['spatieData']);
         }
 
-        if ($type === 'web') {
-            return $this->generateWebController($modelData, $data['requestName'], $data['repository'], $data['service'], $options, $data['spatieData']);
+        if (in_array('web', $types)) {
+            $controllerName = $this->generateWebController($modelData, $data['requestName'], $data['repository'], $data['service'], $options, $data['spatieData']);
         }
 
-        throw new InvalidArgumentException("Unsupported controller type: $type");
+        if (! $controllerName) {
+            throw new InvalidArgumentException('Unsupported controller type');
+        }
+
+        return $controllerName;
     }
 
     private function generateAPIController(array $modelData, string $requestName, string $repository, string $service, array $options, ?string $spatieData = null): string
     {
+        $controllerName = null;
+
         if ($options['pattern'] == 'spatie-data') {
             $controllerName = $repository
                 ? $this->controllerBuilder->createAPIRepositorySpatieData($modelData, $spatieData, $service, $options['overwrite'])
                 : $this->controllerBuilder->createAPISpatieData($modelData, $spatieData, $options['overwrite']);
-        } else {
+        } elseif ($options['pattern'] == 'normal') {
             $resourceName = $this->resourceBuilder->create($modelData, $options['overwrite']);
             $controllerName = $repository
                 ? $this->controllerBuilder->createAPIRepository($modelData, $resourceName, $requestName, $service, $options['overwrite'])
                 : $this->controllerBuilder->createAPI($modelData, $resourceName, $requestName, $options['overwrite']);
         }
 
-        if ($options['postman']) {
-            $this->postmanBuilder->create($modelData, $options['overwrite']);
-        }
-
-        if ($options['curl']) {
-            $this->CURLBuilder->create($modelData, $options['overwrite']);
-        }
-
-        if ($options['swagger-api']) {
-            $this->swaggerAPIBuilder->create($modelData, $options['overwrite']);
+        if (! $controllerName) {
+            throw new InvalidArgumentException('Unsupported controller type');
         }
 
         return $controllerName;
@@ -136,17 +109,23 @@ class CRUDGenerator
 
     private function generateWebController(array $modelData, string $requestName, string $repository, string $service, array $options, string $spatieData = ''): string
     {
+        $controllerName = null;
+
         if ($options['pattern'] == 'spatie-data') {
             $controllerName = $repository
                 ? $this->controllerBuilder->createWebRepositorySpatieData($modelData, $spatieData, $service, $options['overwrite'])
                 : $this->controllerBuilder->createWebSpatieData($modelData, $spatieData, $options['overwrite']);
-        } else {
+        } elseif ($options['pattern'] == 'normal') {
             $controllerName = $repository
                 ? $this->controllerBuilder->createWebRepository($modelData, $requestName, $service, $options['overwrite'])
                 : $this->controllerBuilder->createWeb($modelData, $requestName, $options['overwrite']);
         }
 
-        $this->viewBuilder->create($modelData['modelName']);
+        $this->viewBuilder->create($modelData, $options['overwrite']);
+
+        if (! $controllerName) {
+            throw new InvalidArgumentException('Unsupported controller type');
+        }
 
         return $controllerName;
     }

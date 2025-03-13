@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mrmarchone\LaravelAutoCrud\Builders;
+namespace Mrmarchone\LaravelAutoCrud\Builders\DocumentationBuilders;
 
 use Illuminate\Support\Str;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;

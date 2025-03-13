@@ -9,16 +9,25 @@ use Mrmarchone\LaravelAutoCrud\Services\HelperService;
 
 class RouteBuilder
 {
-    public function create(string $modelName, string $controller, string $type): void
+    public function create(string $modelName, string $controller, array $types): void
     {
         $modelName = HelperService::toSnakeCase(Str::plural($modelName));
-        $isApi = $type === 'api';
 
-        $routesPath = base_path($isApi ? 'routes/api.php' : 'routes/web.php');
-        $routeCode = $isApi
-            ? "Route::apiResource('/{$modelName}', {$controller}::class);"
-            : "Route::resource('/{$modelName}', {$controller}::class);";
+        if (in_array('api', $types)) {
+            $routesPath = base_path('routes/api.php');
+            $routeCode = "Route::apiResource('/{$modelName}', {$controller}::class);";
+            $this->createRoutes($routesPath, $routeCode);
+        }
 
+        if (in_array('web', $types)) {
+            $routesPath = base_path('routes/web.php');
+            $routeCode = "Route::resource('/{$modelName}', {$controller}::class);";
+            $this->createRoutes($routesPath, $routeCode);
+        }
+    }
+
+    private function createRoutes(string $routesPath, string $routeCode): void
+    {
         if (! file_exists($routesPath)) {
             file_put_contents($routesPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n");
         }

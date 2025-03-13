@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mrmarchone\LaravelAutoCrud\Builders;
+namespace Mrmarchone\LaravelAutoCrud\Builders\DocumentationBuilders;
 
 use Illuminate\Support\Str;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;
@@ -101,7 +101,7 @@ class PostmanBuilder
                             'raw' => $routeBase.$path,
                             'protocol' => $parsedUrl['scheme'],
                             'host' => explode('.', $parsedUrl['host']),
-                            'port' => $parsedUrl['port'],
+                            'port' => $parsedUrl['port'] ?? 80,
                             'path' => array_merge(explode('/', substr($parsedUrl['path'], 1)), ! empty($path) ? [substr($path, 1)] : []),
                             'variable' => ! empty($path) ? [
                                 [

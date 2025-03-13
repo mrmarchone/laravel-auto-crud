@@ -7,6 +7,7 @@ namespace Mrmarchone\LaravelAutoCrud\Console\Commands;
 use Illuminate\Console\Command;
 use Mrmarchone\LaravelAutoCrud\Services\CRUDGenerator;
 use Mrmarchone\LaravelAutoCrud\Services\DatabaseValidatorService;
+use Mrmarchone\LaravelAutoCrud\Services\DocumentationGenerator;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;
 use Mrmarchone\LaravelAutoCrud\Services\ModelService;
 
@@ -20,10 +21,10 @@ class GenerateAutoCrudCommand extends Command
     {--FA|force-all : Force generate all possible files with overwrite option.}
     {--MP|model-path= : Set models path.}
     {--M|model=* : Select one or more of your models.}
-    {--T|type= : Select weather api or web.}
+    {--T|type=* : Select weather api, web or both.}
     {--R|repository : Working with repository design pattern.}
     {--O|overwrite : Overwrite the files if already exists.}
-    {--P|pattern= : Supports Spatie-Data Pattern.}
+    {--P|pattern=normal : Supports Spatie-Data Pattern.}
     {--C|curl : Generate CURL Requests for API.}
     {--PM|postman : Generate Postman Collection for API.}
     {--S|swagger-api : Generate Swagger API json for API.}';
@@ -32,7 +33,8 @@ class GenerateAutoCrudCommand extends Command
 
     public function __construct(
         protected DatabaseValidatorService $databaseValidatorService,
-        protected CRUDGenerator $CRUDGenerator
+        protected CRUDGenerator $CRUDGenerator,
+        protected DocumentationGenerator $documentationGenerator,
     ) {
         parent::__construct();
     }
@@ -67,7 +69,7 @@ class GenerateAutoCrudCommand extends Command
 
             return;
         }
-
+        $this->parsingOptions();
         $this->generate($models);
     }
 
@@ -87,7 +89,9 @@ class GenerateAutoCrudCommand extends Command
                 }
             }
             $this->CRUDGenerator->generate($modelData, $this->options());
+            $this->documentationGenerator->generate($modelData, $this->options(), count($models) > 1);
         }
+
     }
 
     private function everythingIsOk(): bool
@@ -98,8 +102,8 @@ class GenerateAutoCrudCommand extends Command
             return false;
         }
 
-        if ($this->option('type') && ! in_array($this->option('type'), ['api', 'web'])) {
-            alert('Make sure that the type is "api" or "web".');
+        if ($this->option('type') && empty(array_intersect($this->option('type'), ['api', 'web']))) {
+            alert('Make sure that the type is "api", "web" or "both".');
 
             return false;
         }
@@ -111,5 +115,31 @@ class GenerateAutoCrudCommand extends Command
         }
 
         return true;
+    }
+
+    private function parsingOptions(): void
+    {
+        if ($this->option('all')) {
+            $this->forceAllBooleanOptions();
+            $this->input->setOption('overwrite', false);
+        }
+
+        if ($this->option('force-all')) {
+            $this->forceAllBooleanOptions();
+            $this->input->setOption('overwrite', true);
+        }
+
+        if (! $this->option('all') && ! $this->option('force-all')) {
+            HelperService::askForType($this->input, $this->option('type'));
+        }
+    }
+
+    private function forceAllBooleanOptions(): void
+    {
+        $this->input->setOption('repository', true);
+        $this->input->setOption('curl', true);
+        $this->input->setOption('postman', true);
+        $this->input->setOption('swagger-api', true);
+        $this->input->setOption('type', ['api', 'web']);
     }
 }

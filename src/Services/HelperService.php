@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Mrmarchone\LaravelAutoCrud\Services;
 
+use function Laravel\Prompts\multiselect;
+
 class HelperService
 {
     public static function formatArrayToPhpSyntax(array $data, bool $removeValuesQuotes = false, int $indentation = 12): string
@@ -51,5 +53,27 @@ ASCII;
         echo "\n$asciiArt\n\n";
         echo "[+] Name: Abdelrahman Muhammed\n";
         echo "[+] Email: mrmarchone@gmail.com\n";
+    }
+
+    public static function askForType($inputType, ?array $types = []): void
+    {
+        $newTypes = count($types) > 0 ? $types : multiselect(
+            label: 'Do you want to create an "api", "web" or "both" controller?',
+            options: ['api', 'web'],
+            default: ['api'],
+            required: true,
+            validate: function ($value) {
+                if (empty(array_intersect($value, ['api', 'web']))) {
+                    return 'Please enter a valid type api or web';
+                }
+
+                return null;
+            },
+            hint: 'Select api, web or both',
+        );
+
+        $types = array_map('strtolower', $newTypes);
+
+        $inputType->setOption('type', $types);
     }
 }

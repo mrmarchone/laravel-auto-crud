@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mrmarchone\LaravelAutoCrud\Builders;
+namespace Mrmarchone\LaravelAutoCrud\Builders\DocumentationBuilders;
 
 use Illuminate\Support\Str;
 use Mrmarchone\LaravelAutoCrud\Services\HelperService;
@@ -111,12 +111,15 @@ class SwaggerAPIBuilder
                 ];
             }
         }
-        if (! in_array($ucFirstModel, $oldSchemasKeys) && count($data)) {
+        if (! in_array($ucFirstModel, $oldSchemasKeys)) {
             $schemas[$ucFirstModel] = [
                 'type' => 'object',
-                'properties' => collect($data)->map(fn ($item) => collect($item)->filter(fn ($value, $key) => $key !== 'is_required'))->toArray(),
-                'required' => collect($data)->where('is_required', true)->keys()->toArray(),
             ];
+
+            if (count($data)) {
+                $schemas[$ucFirstModel]['properties'] = collect($data)->map(fn ($item) => collect($item)->filter(fn ($value, $key) => $key !== 'is_required'))->toArray();
+                $schemas[$ucFirstModel]['required'] = collect($data)->where('is_required', true)->keys()->toArray();
+            }
         }
 
         if (count($items)) {
