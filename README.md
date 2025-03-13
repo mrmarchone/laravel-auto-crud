@@ -45,12 +45,14 @@ Usage:
   auto-crud:generate [options]
 
 Options:
+  -A, --all                       Force generate all possible files without overwrite option.
   -M, --model[=MODEL]             Select one or more of your models. (multiple values allowed)
-  -T, --type[=TYPE]               Select weather api or web.
-  -R, --repository                Working with repository design pattern
+  -T, --type[=TYPE]               Select weather api, web or both. (multiple values allowed)
+  -R, --repository                Working with repository design pattern.
   -O, --overwrite                 Overwrite the files if already exists.
-  -P, --pattern[=PATTERN]         Supports Spatie-Data Pattern.
+  -P, --pattern[=PATTERN]         Supports Spatie-Data Pattern. [default: "normal"]
   -C, --curl                      Generate CURL Requests for API.
+  -S, --swagger-api               Generate Swagger API json for API.
   -h, --help                      Display help for the given command. When no command is given display help for the list command
       --silent                    Do not output any message
   -q, --quiet                     Only errors are displayed. All other output is suppressed
@@ -58,6 +60,7 @@ Options:
       --ansi|--no-ansi            Force (or disable --no-ansi) ANSI output
   -n, --no-interaction            Do not ask any interactive question
       --env[=ENV]                 The environment the command should run under
+  -FA, --force-all                Force generate all possible files with overwrite option.
   -MP, --model-path[=MODEL-PATH]  Set models path.
   -PM, --postman                  Generate Postman Collection for API.
   -v|vv|vvv, --verbose            Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
@@ -518,12 +521,155 @@ Route::resource('/users', App\Http\Controllers\UserController::class);
 ```
 
 - Views (if applicable):
-![Views](images/resources_views.png)
+- Create:
+  ```bladehtml
+  <div class="container">
+      <h2>Create users</h2>
+      <form action="{{ route('users.store') }}" method="POST">
+          @csrf
+          <div class="mb-3">
+              <label for="name" class="form-label">name</label>
+              <input type="text" class="form-control" name="name" value="{{old("name")}}">
+              @error("name")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="email" class="form-label">email</label>
+              <input type="text" class="form-control" name="email" value="{{old("email")}}">
+              @error("email")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="email_verified_at" class="form-label">email_verified_at</label>
+              <input type="text" class="form-control" name="email_verified_at" value="{{old("email_verified_at")}}">
+              @error("email_verified_at")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="password" class="form-label">password</label>
+              <input type="text" class="form-control" name="password" value="{{old("password")}}">
+              @error("password")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="remember_token" class="form-label">remember_token</label>
+              <input type="text" class="form-control" name="remember_token" value="{{old("remember_token")}}">
+              @error("remember_token")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+    
+          <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+  </div>
+  ```
+  - Edit:
+  ```bladehtml
+      <div class="container">
+      <h2>Edit user</h2>
+      <form action="{{ route('users.update', $user->id) }}" method="POST">
+          @csrf
+          @method("PATCH")
+          <div class="mb-3">
+              <label for="name" class="form-label">name</label>
+              <input type="text" class="form-control" name="name" value="{{old("name", $user["name"])}}">
+              @error("name")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="email" class="form-label">email</label>
+              <input type="text" class="form-control" name="email" value="{{old("email", $user["email"])}}">
+              @error("email")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="email_verified_at" class="form-label">email_verified_at</label>
+              <input type="text" class="form-control" name="email_verified_at"
+                     value="{{old("email_verified_at", $user["email_verified_at"])}}">
+              @error("email_verified_at")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="password" class="form-label">password</label>
+              <input type="text" class="form-control" name="password" value="{{old("password", $user["password"])}}">
+              @error("password")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+          <div class="mb-3">
+              <label for="remember_token" class="form-label">remember_token</label>
+              <input type="text" class="form-control" name="remember_token"
+                     value="{{old("remember_token", $user["remember_token"])}}">
+              @error("remember_token")
+              <p>{{$message}}</p>
+              @enderror
+          </div>
+    
+          <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+  </div>
+  ```
+  - Index:
+  ```bladehtml
+  <div class="container">
+      <h2>users List</h2>
+      <a href="{{ route('users.create') }}" class="btn btn-primary mb-3">Create users</a>
+      <table class="table">
+          <thead>
+          <tr>
+              <th>name</th>
+              <th>email</th>
+              <th>email_verified_at</th>
+              <th>password</th>
+              <th>remember_token</th>
+          </tr>
+          </thead>
+          <tbody>
+          @foreach ($users as $item)
+              <tr>
+                  <td>{{$item->name}}</td>
+                  <td>{{$item->email}}</td>
+                  <td>{{$item->email_verified_at}}</td>
+                  <td>{{$item->password}}</td>
+                  <td>{{$item->remember_token}}</td>
+                  <td>
+                      <a href="{{ route('users.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                      <form action="{{ route('users.destroy', $item->id) }}" method="POST" style="display:inline;">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
+                              Delete
+                          </button>
+                      </form>
+                  </td>
+              </tr>
+          @endforeach
+          </tbody>
+      </table>
+  </div>
+  ```
+  - View:
+  ```bladehtml
+    <div class="container">
+        <h2>user Details</h2>
+        <p><strong>name:</strong> {{ $user ->name }}</p>
+        <p><strong>email:</strong> {{ $user ->email }}</p>
+        <p><strong>email_verified_at:</strong> {{ $user ->email_verified_at }}</p>
+        <p><strong>password:</strong> {{ $user ->password }}</p>
+        <p><strong>remember_token:</strong> {{ $user ->remember_token }}</p>
+    
+    </div>
+    ```
 
 - CURL (if applicable): 
   - You will find it in the laravel-auto-crud folder under the name curl.txt.
-- Postman Collection (if applicable):
-    - You will find it in the laravel-auto-crud folder under the name postman.json.
 ```bash
 =====================User=====================
 curl --location 'http://127.0.0.1:8000/api/users' \
@@ -567,6 +713,10 @@ curl --location 'http://127.0.0.1:8000/api/users/:id' \
 
 =====================User=====================
 ```
+- Postman Collection (if applicable):
+    - You will find it in the laravel-auto-crud folder under the name postman.json.
+- Swagger API V3 Collection (if applicable):
+    - You will find it in the laravel-auto-crud folder under the name swagger-api.json.
 - Repository (if applicable):
 ```php
 <?php
