@@ -47,7 +47,7 @@ Usage:
 Options:
   -A, --all                       Force generate all possible files without overwrite option.
   -M, --model[=MODEL]             Select one or more of your models. (multiple values allowed)
-  -T, --type[=TYPE]               Select weather api, web or both. (multiple values allowed)
+  -T, --type[=TYPE]               Select api, web or both. (multiple values allowed)
   -R, --repository                Working with repository design pattern.
   -O, --overwrite                 Overwrite the files if already exists.
   -P, --pattern[=PATTERN]         Supports Spatie-Data Pattern. [default: "normal"]
