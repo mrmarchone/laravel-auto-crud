@@ -11,46 +11,93 @@ use Symfony\Component\HttpFoundation\Response;
 
 class {{ class }} extends Controller
 {
-    public function index(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function index()
     {
-        return {{ resource }}::collection({{ model }}::latest()->paginate(10));
-    }
+         try {
+                ${{ modelVariable }} = {{ model }}::latest()->paginate(10);
+                return response()->json([
+                'success' => true,
+                'message' => '{{ model }} were successfully retrieved',
+                'data' => {{ modelVariable }}
+                ], Response::HTTP_OK);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch {{ model }}. Please try again',
+                    'error' => $e->getMessage()
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+     }
 
-    public function store({{ request }} $request): {{ resource }}|\Illuminate\Http\JsonResponse
+    public function store({{ request }} $request)
     {
         try {
             ${{ modelVariable }} = {{ model }}::create($request->validated());
-            return new {{ resource }}(${{ modelVariable }});
-        } catch (\Exception $exception) {
-            report($exception);
-            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+                'success' => true,
+                'message' => '{{ model }} has been successfully created',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+             'success' => false,
+              'message' => 'Failed to create {{ model }}. Please try again',
+              'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function show({{ model }} ${{ modelVariable }}): {{ resource }}
+    public function show($id)
     {
-        return {{ resource }}::make(${{ modelVariable }});
+         try {
+          ${{ modelVariable }} = {{ model }}::findOrFail($id);
+           return response()->json([
+           'success' => true,
+            'message' => 'Successfully fetched {{ model }}',
+             'data' =>  ${{ modelVariable }}
+              ], Response::HTTP_OK);
+         } catch (\Exception $e) {
+                    return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to retrieve the {{ model }}. Please try again',
+                    'error' => $e->getMessage()
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+
     }
 
-    public function update({{ request }} $request, {{ model }} ${{ modelVariable }}): {{ resource }}|\Illuminate\Http\JsonResponse
+    public function update({{ request }} $request, $id)
     {
         try {
+            ${{ modelVariable }} = ${{ model }}::findOrFail($id);
             ${{ modelVariable }}->update($request->validated());
-            return new {{ resource }}(${{ modelVariable }});
-        } catch (\Exception $exception) {
-            report($exception);
-            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+             'success' => true,
+             'message' => '{ model } has been successfully updated',
+              'data' => ${{ modelVariable }}
+              ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+            'success' => false,
+            'message' => 'Failed to update {{ model }}. Please try again',
+            'error' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\JsonResponse
+    public function destroy($id)
     {
         try {
+            ${{ modelVariable }}->findOrFail($id);
             ${{ modelVariable }}->delete();
-            return response()->json(['message' => 'Deleted successfully'], Response::HTTP_OK);
-        } catch (\Exception $exception) {
-            report($exception);
-            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+            'message' => '{{ model }} has been successfully deleted',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+            'success' => false,
+             'message' => 'Failed to delete {{ model }}. Please try again',
+             'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

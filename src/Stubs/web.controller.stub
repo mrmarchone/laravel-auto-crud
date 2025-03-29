@@ -21,29 +21,50 @@ class {{ class }} extends Controller
 
     public function store({{ request }} $request): \Illuminate\Http\RedirectResponse
     {
-        {{ model }}::create($request->validated());
-        return redirect()->route('{{ routeName }}.index')->with('success', 'Created successfully');
+        try {
+         {{ model }}::create($request->validated());
+         session()->flash('success', "Created successfully");
+        }
+        catch (\Exception $exception) {
+          dd($exception);
+        }
+        return redirect()->route('{{ routeName }}.index');
     }
 
-    public function show({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
+    public function show($id): \Illuminate\Contracts\View\View
     {
+        {{ modelVariable }} = {{ model }}::findOrFail($id);
         return view('{{ viewPath }}.show', compact('{{ modelVariable }}'));
     }
 
-    public function edit({{ model }} ${{ modelVariable }}): \Illuminate\Contracts\View\View
+    public function edit($id): \Illuminate\Contracts\View\View
     {
+        {{ modelVariable }} = {{ model }}::findOrFail($id);
         return view('{{ viewPath }}.edit', compact('{{ modelVariable }}'));
     }
 
-    public function update({{ request }} $request, {{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
+    public function update({{ request }} $request, $id): \Illuminate\Http\RedirectResponse
     {
-        ${{ modelVariable }}->update($request->validated());
-        return redirect()->route('{{ routeName }}.index')->with('success', 'Updated successfully');
+        try {
+         ${{ modelVariable }}->update($request->validated());
+         session()->flash('edit_success', "Updated successfully");
+        }
+        catch (\Exception $exception) {
+         dd($exception);
+         }
+        return redirect()->route('{{ routeName }}.index');
     }
 
-    public function destroy({{ model }} ${{ modelVariable }}): \Illuminate\Http\RedirectResponse
+    public function destroy($id): \Illuminate\Http\RedirectResponse
     {
+        try {
+        {{ modelVariable }} = {{ model }}::findOrFail($id);
         ${{ modelVariable }}->delete();
-        return redirect()->route('{{ routeName }}.index')->with('success', 'Deleted successfully');
+        session()->flash('delete_success', "Deleted successfully");
+        }
+        catch (\Exception $exception) {
+         dd($exception);
+         }
+        return redirect()->route('{{ routeName }}.index');
     }
 }
